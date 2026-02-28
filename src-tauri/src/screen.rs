@@ -332,7 +332,7 @@ fn get_window_list_xwin() -> Vec<WindowInfo> {
                 y: w.position.y,
                 width: w.position.width,
                 height: w.position.height,
-                window_id: w.id as u32,
+                window_id: w.id,
             })
             .collect(),
         Ok(Err(e)) => {
@@ -365,7 +365,7 @@ pub fn get_active_window() -> Option<WindowInfo> {
                 y: w.position.y,
                 width: w.position.width,
                 height: w.position.height,
-                window_id: w.id as u32,
+                window_id: w.id,
             })
         }
         Ok(Err(e)) => {
@@ -457,6 +457,7 @@ pub async fn get_browser_url(app_name: String) -> Option<String> {
                 CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
                 COINIT_APARTMENTTHREADED,
             };
+            use windows::Win32::System::Variant::VARIANT;
             use windows::Win32::UI::Accessibility::*;
             use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
@@ -474,7 +475,7 @@ pub async fn get_browser_url(app_name: String) -> Option<String> {
                     let cond = automation
                         .CreatePropertyCondition(
                             UIA_ControlTypePropertyId,
-                            &windows::core::VARIANT::from(50004i32),
+                            &VARIANT::from(50004i32),
                         )
                         .ok()?;
                     let edits = root.FindAll(TreeScope_Descendants, &cond).ok()?;

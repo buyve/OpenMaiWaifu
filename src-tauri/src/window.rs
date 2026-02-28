@@ -228,9 +228,10 @@ pub fn get_all_monitors() -> Vec<MonitorInfo> {
         use windows::Win32::Foundation::{BOOL, LPARAM, RECT};
         use windows::Win32::Graphics::Gdi::{
             EnumDisplayMonitors, GetMonitorInfoW, HDC, HMONITOR, MONITORINFO, MONITORINFOEXW,
-            MONITORINFOF_PRIMARY,
         };
         use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
+
+        const MONITORINFOF_PRIMARY: u32 = 1;
 
         struct MonitorData {
             monitors: Vec<MonitorInfo>,
@@ -269,7 +270,7 @@ pub fn get_all_monitors() -> Vec<MonitorInfo> {
         };
         unsafe {
             let _ = EnumDisplayMonitors(
-                HDC::default(),
+                Some(HDC::default()),
                 None,
                 Some(enum_cb),
                 LPARAM(&mut data as *mut _ as isize),
