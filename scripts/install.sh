@@ -145,6 +145,15 @@ setup_wizard() {
   done
   ok "안녕 ${user_name}!"
 
+  # 3b. Ask for companion name
+  echo ""
+  ask "컴패니언 이름을 지어줘! (Name your companion) [Companion]:"
+  local companion_name
+  prompt companion_name
+  companion_name=$(echo "$companion_name" | xargs)
+  companion_name=${companion_name:-Companion}
+  ok "컴패니언 이름: ${companion_name}"
+
   # 3b. Check OpenClaw CLI
   echo ""
   info "Checking OpenClaw CLI..."
@@ -248,8 +257,14 @@ for a in agents:
         fi
       fi
 
-      # Setup hooks
+      # Set agent identity (name + emoji)
       if [ -n "$agent_id" ]; then
+        info "Setting companion identity: ${companion_name}..."
+        "$openclaw_cmd" agents set-identity --agent "$agent_id" --name "$companion_name" --emoji "✨" 2>/dev/null \
+          && ok "Identity set: ${companion_name} ✨" \
+          || warn "Could not set identity (non-critical)"
+
+        # Setup hooks
         info "Setting up hooks..."
         "$openclaw_cmd" hooks setup 2>/dev/null && ok "Hooks configured" || warn "Hooks setup skipped"
       fi
@@ -299,7 +314,7 @@ JSONEOF
     # Introduce user to the agent so it remembers the name
     info "Introducing you to the agent..."
     local intro_response
-    intro_response=$("$openclaw_cmd" agent --agent "$agent_id" --message "안녕! 내 이름은 ${user_name}이야. 앞으로 나를 ${user_name}이라고 불러줘. 반말로 편하게 대화하자!" 2>&1) && {
+    intro_response=$("$openclaw_cmd" agent --agent "$agent_id" --message "안녕! 너의 이름은 ${companion_name}이야. 내 이름은 ${user_name}이야. 앞으로 나를 ${user_name}이라고 불러줘. 너는 ${companion_name}으로서 반말로 편하게 대화하자!" 2>&1) && {
       ok "Agent knows your name now!"
       echo ""
       printf "  ${DIM}%s${RESET}\n" "$(echo "$intro_response" | head -3)"
