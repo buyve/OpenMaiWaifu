@@ -1,0 +1,19 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-ignore-cursor-events",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-outer-position",
+    "core:window:allow-inner-size",
+    "core:event:default",
+    "core:tray:default",
+    "core:webview:allow-set-webview-focus",
+    {
+      "identifier": "core:event:allow-listen",
+      "allow": [{ "event": "tauri://drag-drop" }]
+    }
+  ]
+}

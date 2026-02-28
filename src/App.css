@@ -1,0 +1,132 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Hide scrollbars */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Prevent text selection across the overlay */
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.debug-overlay {
+  display: none;
+}
+
+/* ---------- Speech Bubble ---------- */
+
+.speech-bubble {
+  position: fixed;
+  transform: translateX(-50%) translateY(-100%);
+  pointer-events: none;
+  z-index: 9998;
+  max-width: 420px;
+  min-width: 120px;
+  animation: speechAppear 0.2s ease;
+  transition: opacity 0.3s ease;
+}
+
+.speech-bubble.fading {
+  opacity: 0;
+}
+
+@keyframes speechAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-90%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%);
+  }
+}
+
+.speech-bubble-text {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a2e;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.speech-bubble-pointer {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(255, 255, 255, 0.95);
+  margin: 0 auto;
+  position: relative;
+  left: 0;
+}
+
+/* ---------- Bottom-Left Buttons ---------- */
+
+.bottom-left-buttons {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9997;
+}
+
+.memory-toggle-btn,
+.settings-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 20, 30, 0.85);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.memory-toggle-btn:hover,
+.settings-toggle-btn:hover {
+  background: rgba(30, 30, 45, 0.95);
+  color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+.memory-toggle-btn:active,
+.settings-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.settings-toggle-btn {
+  font-size: 18px;
+}
