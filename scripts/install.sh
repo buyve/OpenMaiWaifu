@@ -204,6 +204,7 @@ setup_wizard() {
 
   local agent_id=""
   local setup_openclaw=false
+  local selected_model=""
 
   if $openclaw_installed; then
     local version
@@ -224,7 +225,130 @@ setup_wizard() {
     fi
 
     if $gateway_running; then
-      # List existing agents
+
+      # ── LLM Authentication ──
+
+      echo ""
+      printf "${BOLD}── LLM 설정 (AI Model) ──${RESET}\n"
+      echo ""
+
+      # Check existing auth profiles
+      local has_auth=false
+      local configured_models
+      configured_models=$("$openclaw_cmd" models list --json 2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+models = data.get('models', [])
+available = [m for m in models if m.get('available')]
+if available:
+    print('yes')
+    for m in available:
+        tags = ', '.join(t for t in m.get('tags', []) if t in ('default', 'configured'))
+        print(f'  {m[\"key\"]} ({m[\"name\"]}) [{tags}]')
+else:
+    print('no')
+" 2>/dev/null || echo "no")
+
+      if [ "$(echo "$configured_models" | head -1)" = "yes" ]; then
+        has_auth=true
+        ok "LLM already configured:"
+        echo "$configured_models" | tail -n +2
+      fi
+
+      if ! $has_auth; then
+        info "LLM 인증이 필요해요. (LLM authentication required)"
+        echo ""
+        echo "  1) Anthropic API Key"
+        echo "  2) OpenAI API Key"
+        echo "  3) Google (Gemini) API Key"
+        echo "  4) GitHub Copilot (OAuth login)"
+        echo "  5) OpenRouter API Key"
+        echo "  6) 나중에 설정 (Skip for now)"
+        echo ""
+        ask "Enter choice [1]:"
+        local auth_choice
+        prompt auth_choice
+        auth_choice=${auth_choice:-1}
+
+        local auth_provider="" auth_method="paste-token"
+        case "$auth_choice" in
+          1) auth_provider="anthropic" ;;
+          2) auth_provider="openai" ;;
+          3) auth_provider="google" ;;
+          4) auth_provider="github-copilot"; auth_method="oauth" ;;
+          5) auth_provider="openrouter" ;;
+          6) auth_provider="" ;;
+          *) auth_provider="anthropic" ;;
+        esac
+
+        if [ -n "$auth_provider" ]; then
+          if [ "$auth_method" = "oauth" ]; then
+            info "GitHub Copilot OAuth 로그인 시작..."
+            "$openclaw_cmd" models auth login-github-copilot 2>&1 </dev/tty && {
+              ok "GitHub Copilot 인증 완료!"
+              has_auth=true
+            } || warn "OAuth login failed. You can set it up later."
+          else
+            ask "${auth_provider} API Key를 입력해줘:"
+            local api_key
+            prompt api_key
+            api_key=$(echo "$api_key" | xargs)
+            if [ -n "$api_key" ]; then
+              echo "$api_key" | "$openclaw_cmd" models auth paste-token --provider "$auth_provider" 2>&1 && {
+                ok "${auth_provider} API key saved!"
+                has_auth=true
+              } || warn "Could not save API key. You can set it up later."
+            fi
+          fi
+        fi
+      fi
+
+      # ── LLM Model Selection ──
+
+      if $has_auth; then
+        echo ""
+        info "사용할 모델을 골라줘! (Choose a model)"
+        echo ""
+
+        # Refresh model list after auth
+        local models_json
+        models_json=$("$openclaw_cmd" models list --json 2>/dev/null || echo '{"models":[]}')
+        local model_list
+        model_list=$(echo "$models_json" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+models = data.get('models', [])
+available = [m for m in models if m.get('available')]
+for i, m in enumerate(available):
+    default = ' (current default)' if 'default' in m.get('tags', []) else ''
+    print(f'{m[\"key\"]}|{m[\"name\"]}{default}')
+" 2>/dev/null)
+
+        if [ -n "$model_list" ]; then
+          local midx=1
+          while IFS='|' read -r mkey mname; do
+            echo "  ${midx}) ${mname}"
+            midx=$((midx + 1))
+          done <<< "$model_list"
+
+          echo ""
+          ask "Enter choice [1]:"
+          local model_choice
+          prompt model_choice
+          model_choice=${model_choice:-1}
+
+          selected_model=$(echo "$model_list" | sed -n "${model_choice}p" | cut -d'|' -f1)
+          if [ -n "$selected_model" ]; then
+            ok "Model: $selected_model"
+          fi
+        fi
+      fi
+
+      # ── Agent Selection / Creation ──
+
+      echo ""
+      printf "${BOLD}── 에이전트 설정 (Agent) ──${RESET}\n"
+
       local agents_json
       agents_json=$("$openclaw_cmd" agents list --json 2>/dev/null || echo "[]")
       local agent_count
@@ -262,8 +386,12 @@ for a in agents:
           # Treat as new agent name — create with workspace
           local new_name="$choice"
           local workspace="$HOME/.openclaw/workspace-${new_name}"
+          local model_flag=""
+          if [ -n "$selected_model" ]; then
+            model_flag="--model $selected_model"
+          fi
           info "Creating new agent: ${new_name}..."
-          if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive 2>&1; then
+          if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive $model_flag 2>&1; then
             agent_id="$new_name"
             ok "Agent created: $agent_id (workspace: $workspace)"
           else
@@ -277,8 +405,12 @@ for a in agents:
         # No agents exist — create one
         local new_name="desktop-companion"
         local workspace="$HOME/.openclaw/workspace-${new_name}"
+        local model_flag=""
+        if [ -n "$selected_model" ]; then
+          model_flag="--model $selected_model"
+        fi
         info "No agents found. Creating '${new_name}'..."
-        if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive 2>&1; then
+        if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive $model_flag 2>&1; then
           agent_id="$new_name"
           ok "Agent created: $agent_id"
         else
@@ -295,6 +427,13 @@ for a in agents:
         "$openclaw_cmd" agents set-identity --agent "$agent_id" --name "$companion_name" --emoji "✨" 2>/dev/null \
           && ok "Identity set: ${companion_name} ✨" \
           || warn "Could not set identity (non-critical)"
+
+        # Set model for existing agent if selected
+        if [ -n "$selected_model" ]; then
+          "$openclaw_cmd" models set --agent "$agent_id" "$selected_model" 2>/dev/null \
+            && ok "Model set: $selected_model" \
+            || warn "Could not set model (non-critical)"
+        fi
 
         # Setup hooks
         info "Setting up hooks..."
