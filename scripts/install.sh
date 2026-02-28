@@ -459,26 +459,20 @@ for a in agents:
   mkdir -p "$CONFIG_DIR"
 
   # Build SOUL text for the companion
-  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen.
-Personality: ${personality_desc}
-The user's name is ${user_name}. Address them as ${user_name}.
-Speaking style: Casual Korean (반말). Keep responses concise (1-3 sentences).
-Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking).
-Express motions with [motion:X] tags (wave/nod/shake/idle).
-Always stay in character. Never say you are an AI. Never break the fourth wall."
+  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen. Personality: ${personality_desc} The user's name is ${user_name}. Address them as ${user_name}. Speaking style: Casual Korean (반말). Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
 
-  # Write firstrun.json for the app to consume
-  local soul_json
-  soul_json=$(python3 -c "import json; print(json.dumps('''$soul_text'''))" 2>/dev/null)
-  cat > "$DATA_DIR/firstrun.json" << JSONEOF
-{
-  "userName": $(python3 -c "import json; print(json.dumps('$user_name'))" 2>/dev/null || echo "\"$user_name\""),
-  "screenWatchEnabled": true,
-  "commentFrequency": "medium",
-  "ftueComplete": true,
-  "soul": ${soul_json:-"null"}
+  # Write firstrun.json for the app to consume (use python3 for safe JSON encoding)
+  python3 -c "
+import json, sys
+data = {
+    'userName': '$user_name',
+    'screenWatchEnabled': True,
+    'commentFrequency': 'medium',
+    'ftueComplete': True,
+    'soul': sys.stdin.read()
 }
-JSONEOF
+print(json.dumps(data, indent=2, ensure_ascii=False))
+" <<< "$soul_text" > "$DATA_DIR/firstrun.json"
   ok "First-run settings saved"
 
   # Write OpenClaw config if we set it up
