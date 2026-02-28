@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type MutableRefObject } from "react";
+import { useState, useEffect, useCallback, useRef, type MutableRefObject } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { ChatMessage } from "../components/ChatWindow";
 import type { MemoryManager } from "../lib/memoryManager.ts";
@@ -59,17 +59,21 @@ export function useFTUE({
     isFtueComplete() ? "done" : "none",
   );
   const [ftueMessages, setFtueMessages] = useState<ChatMessage[]>([]);
+  const ftueStartedRef = useRef(false);
 
   // FTUE flow: greeting -> open chat with name question
+  // Note: cleanup resets ftueStartedRef so React StrictMode's
+  // unmount-remount cycle can re-schedule the timer correctly.
   useEffect(() => {
-    if (isFtueComplete() || ftuePhase !== "none") return;
+    if (isFtueComplete() || ftueStartedRef.current) return;
+    ftueStartedRef.current = true;
 
     // Phase 1: Show greeting speech bubble + wave animation
     setFtuePhase("greeting");
     showSpeechBubble(FTUE_GREETING);
 
     // Trigger wave animation
-    setTimeout(() => {
+    const waveTimer = setTimeout(() => {
       motionCallbackRef.current?.("wave");
     }, FTUE_WAVE_DELAY_MS);
 
@@ -87,9 +91,11 @@ export function useFTUE({
     }, FTUE_AUTO_OPEN_DELAY_MS);
 
     return () => {
+      clearTimeout(waveTimer);
       clearTimeout(openTimer);
+      ftueStartedRef.current = false;
     };
-  }, [ftuePhase, showSpeechBubble, motionCallbackRef, setIsChatOpen]);
+  }, [showSpeechBubble, motionCallbackRef, setIsChatOpen]);
 
   // Handle user's name entry during FTUE
   const handleFtueChatMessage = useCallback(
