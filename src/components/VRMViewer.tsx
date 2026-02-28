@@ -358,7 +358,7 @@ export default function VRMViewer({
           .catch(() => { rebuild(); });
       });
 
-    const interval = setInterval(rebuild, 250);
+    const interval = setInterval(rebuild, 100);
     return () => clearInterval(interval);
   }, []);
 

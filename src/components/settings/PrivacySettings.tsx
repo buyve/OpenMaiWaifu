@@ -17,7 +17,6 @@ const FREQUENCY_LABELS: Record<ScreenWatchFrequency, string> = {
 export interface PrivacySettingsProps {
   privacySettings: PrivacySettingsType;
   onPrivacySettingsChange: (partial: Partial<PrivacySettingsType>) => void;
-  onOpenMemoryTransparency: () => void;
 }
 
 // ---------- Component ----------
@@ -25,7 +24,6 @@ export interface PrivacySettingsProps {
 export default function PrivacySettings({
   privacySettings,
   onPrivacySettingsChange,
-  onOpenMemoryTransparency,
 }: PrivacySettingsProps) {
   const [blacklistInput, setBlacklistInput] = useState("");
 
@@ -183,15 +181,6 @@ export default function PrivacySettings({
         </div>
       </div>
 
-      <div className="settings-row">
-        <span className="settings-row-label">What do I know?</span>
-        <button
-          className="settings-btn primary"
-          onClick={onOpenMemoryTransparency}
-        >
-          View Data
-        </button>
-      </div>
     </div>
   );
 }

@@ -294,6 +294,11 @@ export class PlatformPhysics {
         // Update ground platform reference to new instance
         const updated = platforms.find((p) => p.id === oldId);
         if (updated) {
+          // Apply platform movement delta to character X so it rides the window
+          const deltaX = updated.x - this._body.groundPlatform!.x;
+          if (deltaX !== 0) {
+            this._body.x += deltaX;
+          }
           this._body.groundPlatform = updated;
           // Snap Y to updated platform position
           this._body.y = updated.y + PHYSICS_COLLISION_SKIN;
@@ -319,12 +324,12 @@ export class PlatformPhysics {
   ): number {
     let hash = screenSize.width ^ (screenSize.height << 16) ^ (taskbarHeightPx << 8);
     for (const w of windows) {
-      // XOR window_id with coarse position (10px grid) to detect moves
+      // XOR window_id with position (2px grid) to detect moves
       hash ^= w.window_id;
-      hash = (hash << 5) - hash + (Math.floor(w.x / 4) | 0);
-      hash = (hash << 5) - hash + (Math.floor(w.y / 4) | 0);
-      hash = (hash << 5) - hash + (Math.floor(w.width / 4) | 0);
-      hash = (hash << 5) - hash + (Math.floor(w.height / 4) | 0);
+      hash = (hash << 5) - hash + (Math.floor(w.x / 2) | 0);
+      hash = (hash << 5) - hash + (Math.floor(w.y / 2) | 0);
+      hash = (hash << 5) - hash + (Math.floor(w.width / 2) | 0);
+      hash = (hash << 5) - hash + (Math.floor(w.height / 2) | 0);
       hash |= 0; // Force 32-bit integer
     }
     return hash;
