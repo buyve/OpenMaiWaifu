@@ -244,7 +244,8 @@ for a in agents:
           warn "Agent creation failed."
           ask "Enter agent name manually (or press Enter to skip):"
           prompt agent_id
-        agent_id=$(echo "$agent_id" | xargs)
+          agent_id=$(echo "$agent_id" | xargs)
+        fi
       fi
 
       # Setup hooks
