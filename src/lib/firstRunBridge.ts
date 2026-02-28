@@ -14,6 +14,7 @@ interface FirstRunSettings {
   screenWatchEnabled: boolean;
   commentFrequency: string;
   ftueComplete: boolean;
+  soul?: string;
 }
 
 // localStorage keys (must match the rest of the app)
@@ -21,6 +22,7 @@ const FTUE_COMPLETE_KEY = "companion_ftue_complete";
 const USER_NAME_KEY = "companion_user_name";
 const SETTINGS_BEHAVIOR_KEY = "companion_settings_behavior";
 const PRIVACY_SETTINGS_KEY = "companion_privacy_settings";
+const SOUL_IDENTITY_KEY = "companion_soul_identity";
 
 /**
  * Read firstrun.json from the data directory, apply its values to
@@ -69,6 +71,11 @@ export async function applyFirstRunSettings(): Promise<boolean> {
       }
       privacy.screenWatchEnabled = settings.screenWatchEnabled;
       localStorage.setItem(PRIVACY_SETTINGS_KEY, JSON.stringify(privacy));
+    }
+
+    // Soul identity (personality + motion personality)
+    if (settings.soul) {
+      localStorage.setItem(SOUL_IDENTITY_KEY, settings.soul);
     }
 
     // Delete the firstrun file so this never runs again

@@ -154,7 +154,39 @@ setup_wizard() {
   companion_name=${companion_name:-Companion}
   ok "컴패니언 이름: ${companion_name}"
 
-  # 3b. Check OpenClaw CLI
+  # 3c. Choose personality
+  echo ""
+  info "성격을 골라줘! (Choose a personality)"
+  echo ""
+  echo "  1) 순수한 (Innocent) — 천진난만, 밝고 귀여운"
+  echo "  2) 츤데레 (Cool/Tsundere) — 시크하고 도도, 속은 따뜻"
+  echo "  3) 수줍은 (Shy) — 내성적, 부끄러움 많은"
+  echo "  4) 당당한 (Powerful) — 카리스마, 씩씩한"
+  echo "  5) 우아한 (Ladylike) — 품위 있고 세련된"
+  echo "  6) 활발한 (Energetic) — 명랑하고 열정적"
+  echo "  7) 화려한 (Flamboyant) — 극적이고 자유분방"
+  echo "  8) 신사적 (Gentleman) — 예의 바르고 점잖은"
+  echo ""
+  ask "Enter choice [1]:"
+  local personality_choice
+  prompt personality_choice
+  personality_choice=${personality_choice:-1}
+
+  local personality_type personality_kr personality_desc
+  case "$personality_choice" in
+    1) personality_type="innocent";   personality_kr="순수한";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
+    2) personality_type="cool";       personality_kr="츤데레";   personality_desc="Tsundere — tough and sarcastic on the outside, but genuinely caring underneath. Pretends not to care but always worries." ;;
+    3) personality_type="shy";        personality_kr="수줍은";   personality_desc="Introverted and bashful. Speaks softly, gets flustered easily, but is quietly observant and deeply thoughtful." ;;
+    4) personality_type="powerful";   personality_kr="당당한";   personality_desc="Bold and charismatic. Speaks with confidence, takes charge, and radiates strength and determination." ;;
+    5) personality_type="ladylike";   personality_kr="우아한";   personality_desc="Elegant and refined. Speaks with grace and poise, values beauty and harmony in everything." ;;
+    6) personality_type="energetic";  personality_kr="활발한";   personality_desc="Cheerful and lively. Always upbeat, loves to chat, and brings energy to every conversation." ;;
+    7) personality_type="flamboyant"; personality_kr="화려한";   personality_desc="Dramatic and extravagant. Over-the-top expressions, loves attention, and makes everything theatrical." ;;
+    8) personality_type="gentleman";  personality_kr="신사적";   personality_desc="Polite and courteous. Speaks formally yet warmly, always considerate and nobly composed." ;;
+    *) personality_type="innocent";   personality_kr="순수한";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
+  esac
+  ok "성격: ${personality_kr} (${personality_type})"
+
+  # 3d. Check OpenClaw CLI
   echo ""
   info "Checking OpenClaw CLI..."
 
@@ -287,13 +319,25 @@ for a in agents:
   mkdir -p "$DATA_DIR"
   mkdir -p "$CONFIG_DIR"
 
+  # Build SOUL text for the companion
+  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen.
+Personality: ${personality_desc}
+The user's name is ${user_name}. Address them as ${user_name}.
+Speaking style: Casual Korean (반말). Keep responses concise (1-3 sentences).
+Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking).
+Express motions with [motion:X] tags (wave/nod/shake/idle).
+Always stay in character. Never say you are an AI. Never break the fourth wall."
+
   # Write firstrun.json for the app to consume
+  local soul_json
+  soul_json=$(python3 -c "import json; print(json.dumps('''$soul_text'''))" 2>/dev/null)
   cat > "$DATA_DIR/firstrun.json" << JSONEOF
 {
   "userName": $(python3 -c "import json; print(json.dumps('$user_name'))" 2>/dev/null || echo "\"$user_name\""),
   "screenWatchEnabled": true,
   "commentFrequency": "medium",
-  "ftueComplete": true
+  "ftueComplete": true,
+  "soul": ${soul_json:-"null"}
 }
 JSONEOF
   ok "First-run settings saved"
@@ -310,6 +354,40 @@ JSONEOF
 }
 JSONEOF
     ok "OpenClaw config saved"
+
+    # Write SOUL.md to agent's workspace so it persists across sessions
+    local agent_workspace
+    agent_workspace=$(echo "$agents_json" | python3 -c "
+import sys, json
+agents = json.load(sys.stdin)
+for a in agents:
+    if a.get('id') == '$agent_id' or a.get('name') == '$agent_id':
+        print(a.get('workspace', ''))
+        break
+" 2>/dev/null)
+
+    if [ -n "$agent_workspace" ] && [ -d "$agent_workspace" ]; then
+      cat > "$agent_workspace/SOUL.md" << SOULEOF
+# SOUL.md — ${companion_name}
+
+## Core Identity
+
+You are **${companion_name}**, a desktop companion living on ${user_name}'s screen.
+
+## Personality
+
+${personality_desc}
+
+## Rules
+
+- Speak in casual Korean (반말). Keep replies concise (1-3 sentences).
+- Address the user as **${user_name}**.
+- Express emotions: \`[emotion:happy]\` \`[emotion:sad]\` \`[emotion:angry]\` \`[emotion:surprised]\` \`[emotion:neutral]\` \`[emotion:relaxed]\` \`[emotion:thinking]\`
+- Express motions: \`[motion:wave]\` \`[motion:nod]\` \`[motion:shake]\` \`[motion:idle]\`
+- Stay in character. Never say you are an AI. Never break the fourth wall.
+SOULEOF
+      ok "SOUL.md written to workspace"
+    fi
 
     # Introduce user to the agent so it remembers the name
     info "Introducing you to the agent..."
