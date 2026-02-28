@@ -82,6 +82,39 @@ export async function saveOpenclawConfig(config: OpenClawConfig): Promise<void> 
   return invoke<void>("save_openclaw_config", { config });
 }
 
+// ---------- Setup Wizard API ----------
+
+export interface InstalledCheck {
+  installed: boolean;
+  version: string;
+}
+
+export interface AgentInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * Check if the OpenClaw CLI binary is installed by running `openclaw --version`.
+ */
+export async function checkOpenclawInstalled(): Promise<InstalledCheck> {
+  return invoke<InstalledCheck>("check_openclaw_installed");
+}
+
+/**
+ * List existing OpenClaw agents via `openclaw agents list --json`.
+ */
+export async function listOpenclawAgents(): Promise<AgentInfo[]> {
+  return invoke<AgentInfo[]>("list_openclaw_agents");
+}
+
+/**
+ * Create a new OpenClaw agent via `openclaw agents add <name> --non-interactive`.
+ */
+export async function createOpenclawAgent(name: string): Promise<string> {
+  return invoke<string>("create_openclaw_agent", { name });
+}
+
 // ---------- Setup API ----------
 
 /**

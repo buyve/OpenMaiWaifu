@@ -21,6 +21,7 @@ export interface UseFTUEOptions {
   motionCallbackRef: MutableRefObject<((motion: string) => void) | null>;
   memoryManager: MemoryManager;
   setIsChatOpen: (open: boolean) => void;
+  onOpenClawSetupNeeded?: () => void;
 }
 
 export interface UseFTUEResult {
@@ -52,6 +53,7 @@ export function useFTUE({
   motionCallbackRef,
   memoryManager,
   setIsChatOpen,
+  onOpenClawSetupNeeded,
 }: UseFTUEOptions): UseFTUEResult {
   const [ftuePhase, setFtuePhase] = useState<FtuePhase>(
     isFtueComplete() ? "done" : "none",
@@ -125,21 +127,22 @@ export function useFTUE({
           // Track user name as a core memory (M0)
           memoryManager.trackKnowledge(`User name: ${userName}`, "M0");
 
-          // Check OpenClaw CLI health — guide user if not configured
-          invoke("check_openclaw_health").catch(() => {
-            const guideMsg: ChatMessage = {
-              id: generateId(),
-              role: "character",
-              text: "채팅하려면 OpenClaw CLI 설정이 필요해! Settings에서 설정해줘~",
-              timestamp: Date.now(),
-            };
-            setFtueMessages((prev) => [...prev, guideMsg]);
-            showSpeechBubble("채팅하려면 OpenClaw CLI 설정이 필요해! Settings에서 설정해줘~");
-          });
+          // Check OpenClaw CLI health — trigger setup wizard if not configured
+          invoke("check_openclaw_health")
+            .then((healthy) => {
+              if (!healthy && onOpenClawSetupNeeded) {
+                onOpenClawSetupNeeded();
+              }
+            })
+            .catch(() => {
+              if (onOpenClawSetupNeeded) {
+                onOpenClawSetupNeeded();
+              }
+            });
         }
       }
     },
-    [ftuePhase, showSpeechBubble, emotionCallbackRef, motionCallbackRef, memoryManager],
+    [ftuePhase, showSpeechBubble, emotionCallbackRef, motionCallbackRef, memoryManager, onOpenClawSetupNeeded],
   );
 
   const isFtueActive = ftuePhase === "ask_name";

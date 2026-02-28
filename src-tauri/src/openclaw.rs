@@ -413,6 +413,172 @@ pub async fn setup_openclaw_hooks(
     Ok(token)
 }
 
+// ---------- Setup Wizard Commands ----------
+
+/// Result of checking whether the OpenClaw CLI is installed.
+#[derive(Serialize)]
+pub struct InstalledCheck {
+    pub installed: bool,
+    pub version: String,
+}
+
+/// Basic agent info returned by `openclaw agents list --json`.
+#[derive(Deserialize, Serialize, Clone)]
+pub struct AgentInfo {
+    pub id: String,
+    pub name: String,
+}
+
+/// Build a `std::process::Command` pre-configured with PATH augmentation
+/// and environment variables suitable for running `openclaw` subprocesses
+/// from inside the Tauri app (which doesn't inherit the user's shell PATH).
+fn build_openclaw_cmd(cli: &str) -> std::process::Command {
+    let mut cmd = std::process::Command::new(cli);
+    cmd.stdin(Stdio::null());
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+    cmd.env("NO_COLOR", "1");
+    cmd.env("TERM", "dumb");
+    cmd.env("FORCE_COLOR", "0");
+
+    if let Ok(home) = std::env::var("HOME") {
+        let extra_paths = [
+            format!("{home}/.npm-global/bin"),
+            format!("{home}/.local/bin"),
+            format!("{home}/.bun/bin"),
+            "/usr/local/bin".to_string(),
+            "/opt/homebrew/bin".to_string(),
+        ];
+        let current_path = std::env::var("PATH").unwrap_or_default();
+        let new_path = format!("{}:{}", extra_paths.join(":"), current_path);
+        cmd.env("PATH", new_path);
+        cmd.env("HOME", home);
+    }
+
+    cmd
+}
+
+/// Check whether the OpenClaw CLI is installed by running `openclaw --version`.
+///
+/// Returns `{ installed: true, version: "..." }` on success,
+/// or `{ installed: false, version: "" }` if the binary cannot be found
+/// or the command times out (5 seconds).
+#[tauri::command]
+pub async fn check_openclaw_installed(
+    config_state: State<'_, ConfigState>,
+) -> Result<InstalledCheck, String> {
+    let config = config_state.get()?;
+    let cli = if config.cli_path.is_empty() {
+        "openclaw".to_string()
+    } else {
+        config.cli_path.clone()
+    };
+
+    let result = tokio::time::timeout(
+        Duration::from_secs(5),
+        tokio::task::spawn_blocking(move || -> std::io::Result<std::process::Output> {
+            let mut cmd = build_openclaw_cmd(&cli);
+            cmd.arg("--version");
+            cmd.output()
+        }),
+    )
+    .await;
+
+    match result {
+        Ok(Ok(Ok(output))) if output.status.success() => {
+            let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            Ok(InstalledCheck {
+                installed: true,
+                version,
+            })
+        }
+        _ => Ok(InstalledCheck {
+            installed: false,
+            version: String::new(),
+        }),
+    }
+}
+
+/// List existing OpenClaw agents by running `openclaw agents list --json`.
+///
+/// Parses the JSON output into a `Vec<AgentInfo>`. Returns an empty vector
+/// if the command fails or produces no agents.
+#[tauri::command]
+pub async fn list_openclaw_agents(
+    config_state: State<'_, ConfigState>,
+) -> Result<Vec<AgentInfo>, String> {
+    let config = config_state.get()?;
+    let cli = if config.cli_path.is_empty() {
+        "openclaw".to_string()
+    } else {
+        config.cli_path.clone()
+    };
+
+    let result = tokio::time::timeout(
+        Duration::from_secs(10),
+        tokio::task::spawn_blocking(move || -> std::io::Result<std::process::Output> {
+            let mut cmd = build_openclaw_cmd(&cli);
+            cmd.arg("agents").arg("list").arg("--json");
+            cmd.output()
+        }),
+    )
+    .await;
+
+    match result {
+        Ok(Ok(Ok(output))) if output.status.success() => {
+            let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            // Try parsing as array of AgentInfo
+            let agents: Vec<AgentInfo> = serde_json::from_str(&stdout).unwrap_or_default();
+            Ok(agents)
+        }
+        Ok(Ok(Ok(output))) => {
+            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+            eprintln!("[list_openclaw_agents] CLI failed: {stderr}");
+            Ok(vec![])
+        }
+        _ => Ok(vec![]),
+    }
+}
+
+/// Create a new OpenClaw agent by running `openclaw agents add <name> --non-interactive`.
+///
+/// Returns the agent name on success.
+#[tauri::command]
+pub async fn create_openclaw_agent(
+    config_state: State<'_, ConfigState>,
+    name: String,
+) -> Result<String, String> {
+    let config = config_state.get()?;
+    let cli = if config.cli_path.is_empty() {
+        "openclaw".to_string()
+    } else {
+        config.cli_path.clone()
+    };
+
+    let agent_name = name.clone();
+
+    let result = tokio::time::timeout(
+        Duration::from_secs(30),
+        tokio::task::spawn_blocking(move || -> std::io::Result<std::process::Output> {
+            let mut cmd = build_openclaw_cmd(&cli);
+            cmd.arg("agents").arg("add").arg(&agent_name).arg("--non-interactive");
+            cmd.output()
+        }),
+    )
+    .await;
+
+    match result {
+        Ok(Ok(Ok(output))) if output.status.success() => Ok(name),
+        Ok(Ok(Ok(output))) => {
+            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+            Err(format!("Failed to create agent: {stderr}"))
+        }
+        Ok(Ok(Err(e))) => Err(format!("Failed to run openclaw CLI: {e}")),
+        Ok(Err(e)) => Err(format!("Task join error: {e}")),
+        Err(_) => Err("Agent creation timed out after 30s".to_string()),
+    }
+}
+
 /// Generate a 64-character random hex token using cryptographic randomness.
 ///
 /// This is used as the Bearer token for OpenClaw webhook authentication.

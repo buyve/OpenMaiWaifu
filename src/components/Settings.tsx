@@ -107,7 +107,9 @@ export interface SettingsProps {
   // Privacy
   privacySettings: PrivacySettings;
   onPrivacySettingsChange: (partial: Partial<PrivacySettings>) => void;
-  onOpenMemoryTransparency: () => void;
+
+  // Setup Wizard
+  onOpenSetupWizard?: () => void;
 }
 
 // ---------- Constants ----------
@@ -126,7 +128,7 @@ export default function Settings({
   onCommentFrequencyChange,
   privacySettings,
   onPrivacySettingsChange,
-  onOpenMemoryTransparency,
+  onOpenSetupWizard,
 }: SettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -204,11 +206,10 @@ export default function Settings({
         <PrivacySettingsCard
           privacySettings={privacySettings}
           onPrivacySettingsChange={onPrivacySettingsChange}
-          onOpenMemoryTransparency={onOpenMemoryTransparency}
         />
 
         {/* ============ OpenClaw Connection ============ */}
-        <OpenClawSettings isOpen={isOpen} />
+        <OpenClawSettings isOpen={isOpen} onOpenSetupWizard={onOpenSetupWizard} />
 
         {/* ============ System ============ */}
         <div className="settings-card">

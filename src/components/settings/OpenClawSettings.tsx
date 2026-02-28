@@ -11,11 +11,12 @@ import type { OpenClawConfig } from "../../lib/openclaw.ts";
 
 export interface OpenClawSettingsProps {
   isOpen: boolean;
+  onOpenSetupWizard?: () => void;
 }
 
 // ---------- Component ----------
 
-export default function OpenClawSettings({ isOpen }: OpenClawSettingsProps) {
+export default function OpenClawSettings({ isOpen, onOpenSetupWizard }: OpenClawSettingsProps) {
   const [openclawOnline, setOpenclawOnline] = useState<boolean | null>(null);
   const [ocConfig, setOcConfig] = useState<OpenClawConfig | null>(null);
   const [ocConfigSaving, setOcConfigSaving] = useState(false);
@@ -139,6 +140,20 @@ export default function OpenClawSettings({ isOpen }: OpenClawSettingsProps) {
               : "Disconnected"}
         </div>
       </div>
+
+      {onOpenSetupWizard && (
+        <div className="settings-row">
+          <span className="settings-row-label">
+            Guided Setup
+            <div className="settings-row-sublabel">
+              Step-by-step wizard for first-time configuration
+            </div>
+          </span>
+          <button className="settings-btn primary" onClick={onOpenSetupWizard}>
+            Setup Wizard
+          </button>
+        </div>
+      )}
 
       {ocConfig && (
         <>

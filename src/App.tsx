@@ -5,8 +5,8 @@ import type { ChatMessage } from "./components/ChatWindow";
 import ChatInputBar from "./components/ChatInputBar";
 import SpeechBubble from "./components/SpeechBubble";
 import Settings from "./components/Settings.tsx";
+import SetupWizard from "./components/SetupWizard.tsx";
 import type { CommentFrequency } from "./components/Settings.tsx";
-import MemoryTransparency from "./components/MemoryTransparency.tsx";
 import { useScreenWatch } from "./hooks/useScreenWatch.ts";
 import type { AppSession } from "./hooks/useScreenWatch.ts";
 import { useFTUE } from "./hooks/useFTUE.ts";
@@ -97,8 +97,8 @@ migrateStorageKeys();
 function App() {
   const [isOverCharacter, setIsOverCharacter] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isMemoryOpen, setIsMemoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSetupWizardOpen, setIsSetupWizardOpen] = useState(false);
   const [dockHeight, setDockHeight] = useState(0);
 
   // Speech bubble state
@@ -313,12 +313,17 @@ function App() {
 
   // ---------- FTUE ----------
 
+  const handleOpenClawSetupNeeded = useCallback(() => {
+    setIsSetupWizardOpen(true);
+  }, []);
+
   const { ftueMessages, isFtueActive, handleFtueChatMessage } = useFTUE({
     showSpeechBubble,
     emotionCallbackRef,
     motionCallbackRef,
     memoryManager,
     setIsChatOpen,
+    onOpenClawSetupNeeded: handleOpenClawSetupNeeded,
   });
 
   // ---------- LLM degradation feedback ----------
@@ -426,7 +431,9 @@ function App() {
 
         buildReactivePrompt().then((res) => {
           const parsed = parseResponse(res.response);
-          if (parsed.text) {
+          // Filter out CLI noise (status words like "complete", "done", etc.)
+          const isCliNoise = parsed.text && /^(completed?|done|ok|error|success(ful)?|failed|ready|processing)$/i.test(parsed.text.trim());
+          if (parsed.text && !isCliNoise) {
             log.info("[App] Reactive comment from LLM:", parsed.text);
             showSpeechBubbleRef.current(parsed.text);
             privacyManager.recordComment(parsed.text);
@@ -581,16 +588,6 @@ function App() {
     [],
   );
 
-  // ---------- Memory Panel ----------
-
-  const handleMemoryOpen = useCallback(() => {
-    setIsMemoryOpen(true);
-  }, []);
-
-  const handleMemoryClose = useCallback(() => {
-    setIsMemoryOpen(false);
-  }, []);
-
   // ---------- Phase 8: Settings Panel Handlers ----------
 
   const handleSettingsClose = useCallback(() => {
@@ -627,21 +624,17 @@ function App() {
     [privacyManager],
   );
 
-  const handleOpenMemoryTransparency = useCallback(() => {
-    setIsSettingsOpen(false);
-    setIsMemoryOpen(true);
-  }, []);
 
   // ---------- Phase 8: Escape Key Handler ----------
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        // Close panels in priority order: settings > memory > chat
-        if (isSettingsOpen) {
+        // Close panels in priority order: wizard > settings > chat
+        if (isSetupWizardOpen) {
+          setIsSetupWizardOpen(false);
+        } else if (isSettingsOpen) {
           setIsSettingsOpen(false);
-        } else if (isMemoryOpen) {
-          setIsMemoryOpen(false);
         } else if (isChatOpen) {
           setIsChatOpen(false);
         }
@@ -650,7 +643,7 @@ function App() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSettingsOpen, isMemoryOpen, isChatOpen]);
+  }, [isSetupWizardOpen, isSettingsOpen, isChatOpen]);
 
   // ---------- Expose emotion/motion setters for VRMViewer ----------
   // These will be set by the VRMViewer component via exposed callbacks
@@ -737,7 +730,7 @@ function App() {
         onEmotionSetterReady={handleVRMEmotionSetter}
         onMotionSetterReady={handleVRMMotionSetter}
         onLoadVRMReady={(fn) => { loadVRMRef.current = fn; }}
-        forceInteractive={isChatOpen || isSettingsOpen || isMemoryOpen}
+        forceInteractive={isChatOpen || isSettingsOpen}
         characterScreenPosRef={characterScreenPosRef}
         onDockHeightChange={setDockHeight}
         personality={motionPersonality}
@@ -789,13 +782,6 @@ function App() {
         />
       )}
 
-      {/* Memory transparency panel */}
-      <MemoryTransparency
-        isOpen={isMemoryOpen}
-        onClose={handleMemoryClose}
-        memoryManager={memoryManager}
-      />
-
       {/* Settings panel */}
       {privacySettingsState && (
         <Settings
@@ -808,21 +794,23 @@ function App() {
           onCommentFrequencyChange={handleCommentFrequencyChange}
           privacySettings={privacySettingsState}
           onPrivacySettingsChange={handlePrivacySettingsChange}
-          onOpenMemoryTransparency={handleOpenMemoryTransparency}
+          onOpenSetupWizard={() => {
+            setIsSettingsOpen(false);
+            setIsSetupWizardOpen(true);
+          }}
         />
       )}
+
+      {/* Setup Wizard */}
+      <SetupWizard
+        isOpen={isSetupWizardOpen}
+        onClose={() => setIsSetupWizardOpen(false)}
+        onComplete={() => setIsSetupWizardOpen(false)}
+      />
 
       {/* Bottom-left buttons: Memory + Settings */}
       {!isFtueActive && (
         <div className="bottom-left-buttons" style={{ bottom: 16 + dockHeight }}>
-          <button
-            className="memory-toggle-btn"
-            onClick={handleMemoryOpen}
-            aria-label="Open memory panel"
-            title="What do I know?"
-          >
-            ?
-          </button>
           <button
             className="settings-toggle-btn"
             onClick={() => setIsSettingsOpen(true)}
