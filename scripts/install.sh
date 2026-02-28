@@ -295,6 +295,20 @@ JSONEOF
 }
 JSONEOF
     ok "OpenClaw config saved"
+
+    # Introduce user to the agent so it remembers the name
+    info "Introducing you to the agent..."
+    local intro_response
+    intro_response=$("$openclaw_cmd" agent --agent "$agent_id" --message "안녕! 내 이름은 ${user_name}이야. 앞으로 나를 ${user_name}이라고 불러줘. 반말로 편하게 대화하자!" 2>&1) && {
+      ok "Agent knows your name now!"
+      echo ""
+      printf "  ${DIM}%s${RESET}\n" "$(echo "$intro_response" | head -3)"
+      local line_count
+      line_count=$(echo "$intro_response" | wc -l | xargs)
+      if [ "$line_count" -gt 3 ]; then
+        printf "  ${DIM}...${RESET}\n"
+      fi
+    } || warn "Could not introduce you to the agent (you can chat later)"
   fi
 
   # ── Done ──
