@@ -218,22 +218,32 @@ for a in agents:
           agent_id=$(echo "$agent_names" | sed -n "${choice}p")
           ok "Selected agent: $agent_id"
         elif [ -n "$choice" ]; then
-          # Treat as new agent name — try to create
-          info "Creating new agent: ${choice}..."
-          if "$openclaw_cmd" agents add "$choice" --non-interactive 2>/dev/null; then
-            agent_id="$choice"
-            ok "Agent created: $agent_id"
+          # Treat as new agent name — create with workspace
+          local new_name="$choice"
+          local workspace="$HOME/.openclaw/workspace-${new_name}"
+          info "Creating new agent: ${new_name}..."
+          if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive 2>&1; then
+            agent_id="$new_name"
+            ok "Agent created: $agent_id (workspace: $workspace)"
           else
-            warn "Auto-create not supported. Run 'openclaw agents add ${choice}' manually."
-            info "Using '${choice}' as agent ID in config anyway."
-            agent_id="$choice"
+            warn "Agent creation failed."
+            ask "Enter an existing agent name instead (or press Enter to skip):"
+            prompt agent_id
+            agent_id=$(echo "$agent_id" | xargs)
           fi
         fi
       else
-        # No agents exist
-        warn "No agents found."
-        ask "Enter agent name to use (or press Enter to skip):"
-        prompt agent_id
+        # No agents exist — create one
+        local new_name="desktop-companion"
+        local workspace="$HOME/.openclaw/workspace-${new_name}"
+        info "No agents found. Creating '${new_name}'..."
+        if "$openclaw_cmd" agents add "$new_name" --workspace "$workspace" --non-interactive 2>&1; then
+          agent_id="$new_name"
+          ok "Agent created: $agent_id"
+        else
+          warn "Agent creation failed."
+          ask "Enter agent name manually (or press Enter to skip):"
+          prompt agent_id
         agent_id=$(echo "$agent_id" | xargs)
       fi
 
