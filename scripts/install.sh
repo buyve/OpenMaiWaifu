@@ -11,7 +11,7 @@
 #    3. Interactive CLI setup (name, OpenClaw agent)
 #    4. Write firstrun.json so the app skips FTUE
 # ──────────────────────────────────────────────────────────
-set -euo pipefail
+set -eo pipefail
 
 REPO="buyve/OpenMaiWaifu"
 APP_NAME="AI Desktop Companion"
@@ -34,6 +34,8 @@ ok()    { printf "${GREEN}✓${RESET} %s\n" "$*"; }
 warn()  { printf "${YELLOW}⚠${RESET} %s\n" "$*"; }
 err()   { printf "${RED}✗${RESET} %s\n" "$*" >&2; }
 ask()   { printf "${BOLD}${CYAN}?${RESET}${BOLD} %s${RESET} " "$*"; }
+# Read from terminal even when piped via curl
+prompt() { read -r "$@" </dev/tty; }
 
 banner() {
   echo ""
@@ -90,7 +92,8 @@ download_and_install() {
 
   local tmpdir
   tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
+  # Clean up temp dir when function exits — use subshell-safe approach
+  _INSTALL_TMPDIR="$tmpdir"
 
   info "Downloading ${filename}..."
   if ! curl -fSL --progress-bar -o "$tmpdir/$filename" "$url"; then
@@ -137,7 +140,7 @@ setup_wizard() {
   local user_name=""
   while [ -z "$user_name" ]; do
     ask "이름이 뭐야? (What's your name?):"
-    read -r user_name
+    prompt user_name
     user_name=$(echo "$user_name" | xargs)  # trim whitespace
   done
   ok "안녕 ${user_name}!"
@@ -205,12 +208,12 @@ for i, a in enumerate(agents):
         echo ""
         ask "Enter choice [1]:"
         local choice
-        read -r choice
+        prompt choice
         choice=${choice:-1}
 
         if [ "$choice" = "2" ]; then
           ask "Enter agent name/ID:"
-          read -r agent_id
+          prompt agent_id
           agent_id=$(echo "$agent_id" | xargs)
           if [ -n "$agent_id" ]; then
             ok "Using existing agent: $agent_id"
@@ -227,7 +230,7 @@ for i, a in enumerate(agents):
         else
           warn "Could not create agent automatically."
           ask "Enter agent name manually (or press Enter to skip):"
-          read -r agent_id
+          prompt agent_id
           agent_id=$(echo "$agent_id" | xargs)
         fi
       fi
@@ -304,7 +307,7 @@ EOF
   echo ""
   ask "Launch the app now? [Y/n]:"
   local launch
-  read -r launch
+  prompt launch
   launch=${launch:-Y}
 
   if [[ "$launch" =~ ^[Yy] ]]; then
@@ -318,6 +321,12 @@ EOF
   ok "Done! Enjoy your AI companion 🎉"
   echo ""
 }
+
+# ── Cleanup ──
+
+_INSTALL_TMPDIR=""
+cleanup() { [ -n "$_INSTALL_TMPDIR" ] && rm -rf "$_INSTALL_TMPDIR"; }
+trap cleanup EXIT
 
 # ── Main ──
 
