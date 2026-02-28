@@ -191,48 +191,50 @@ setup_wizard() {
 
       echo ""
       if [ "$agent_count" -gt "0" ]; then
-        info "Found $agent_count existing agent(s):"
-        echo "$agents_json" | python3 -c "
+        # Build agent names array
+        local agent_names
+        agent_names=$(echo "$agents_json" | python3 -c "
 import sys, json
 agents = json.load(sys.stdin)
-for i, a in enumerate(agents):
-    name = a.get('name', a.get('id', 'unknown'))
-    print(f'  {i+1}. {name}')
-" 2>/dev/null || echo "  (could not parse agent list)"
+for a in agents:
+    print(a.get('name', a.get('id', 'unknown')))
+" 2>/dev/null)
+
+        info "Found $agent_count existing agent(s):"
+        local idx=1
+        while IFS= read -r name; do
+          echo "  ${idx}) ${name}"
+          idx=$((idx + 1))
+        done <<< "$agent_names"
 
         echo ""
-        ask "Choose an option:"
-        echo ""
-        echo "  1) 새 에이전트 만들기 (Create new — recommended)"
-        echo "  2) 기존 에이전트 사용 (Use existing)"
-        echo ""
-        ask "Enter choice [1]:"
+        ask "Select agent number (or type a name to create new) [1]:"
         local choice
         prompt choice
         choice=${choice:-1}
 
-        if [ "$choice" = "2" ]; then
-          ask "Enter agent name/ID:"
-          prompt agent_id
-          agent_id=$(echo "$agent_id" | xargs)
-          if [ -n "$agent_id" ]; then
-            ok "Using existing agent: $agent_id"
+        # If numeric, pick from list
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$agent_count" ]; then
+          agent_id=$(echo "$agent_names" | sed -n "${choice}p")
+          ok "Selected agent: $agent_id"
+        elif [ -n "$choice" ]; then
+          # Treat as new agent name — try to create
+          info "Creating new agent: ${choice}..."
+          if "$openclaw_cmd" agents add "$choice" --non-interactive 2>/dev/null; then
+            agent_id="$choice"
+            ok "Agent created: $agent_id"
+          else
+            warn "Auto-create not supported. Run 'openclaw agents add ${choice}' manually."
+            info "Using '${choice}' as agent ID in config anyway."
+            agent_id="$choice"
           fi
         fi
-      fi
-
-      # Create new agent if needed
-      if [ -z "$agent_id" ]; then
-        info "Creating new agent: desktop-companion..."
-        if "$openclaw_cmd" agents add desktop-companion --non-interactive 2>/dev/null; then
-          agent_id="desktop-companion"
-          ok "Agent created: desktop-companion"
-        else
-          warn "Could not create agent automatically."
-          ask "Enter agent name manually (or press Enter to skip):"
-          prompt agent_id
-          agent_id=$(echo "$agent_id" | xargs)
-        fi
+      else
+        # No agents exist
+        warn "No agents found."
+        ask "Enter agent name to use (or press Enter to skip):"
+        prompt agent_id
+        agent_id=$(echo "$agent_id" | xargs)
       fi
 
       # Setup hooks
