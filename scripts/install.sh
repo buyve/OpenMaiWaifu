@@ -16,7 +16,7 @@ set -eo pipefail
 REPO="buyve/OpenMaiWaifu"
 APP_NAME="AI Desktop Companion"
 DATA_DIR="${HOME}/Library/Application Support/ai-desktop-companion"
-CONFIG_DIR="${HOME}/.config/ai-desktop-companion"
+CONFIG_DIR="${HOME}/Library/Application Support/ai-desktop-companion"
 
 # ── Colors ──
 RED='\033[0;31m'
