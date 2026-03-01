@@ -480,12 +480,6 @@ Example:
 - [x] Daily limit (3 per day)
 - [ ] User feedback loop (strengthen/weaken)
 
-### Phase 6: UI
-- [ ] Forgetting queue tab in Memory Transparency
-- [ ] Personality island visualization
-- [ ] Sense of Self display
-- [ ] Promotion notification + M0 approval UI
-
 ---
 
 ## 10. References
