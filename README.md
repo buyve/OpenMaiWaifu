@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="OpenMaiWaifu Banner" width="100%">
+</p>
+
 <h1 align="center">
   OpenMaiWaifu
 </h1>
