@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/install.sh
+      - scripts/install.ps1
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -30,6 +31,7 @@ jobs:
         run: |
           mkdir -p _site
           cp scripts/install.sh _site/install.sh
+          cp scripts/install.ps1 _site/install.ps1
 
       - name: Configure Pages
         uses: actions/configure-pages@v4

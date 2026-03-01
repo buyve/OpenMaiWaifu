@@ -29,10 +29,14 @@ Unlike static chatbots, this companion is **always present**. It sits on your ta
 
 If you want a desktop character that actually **knows you** and grows with you, this is it.
 
-**Preferred setup:** run the install script in your terminal. It guides you through language, name, personality, AI model, and OpenClaw agent setup. Works on macOS (Apple Silicon + Intel). Windows via `.msi` download.
+**Preferred setup:** run the install script in your terminal. It guides you through language, name, personality, AI model, and OpenClaw agent setup. Works on macOS (Apple Silicon + Intel) and Windows.
 
 ```bash
+# macOS
 curl -fsSL "https://buyve.github.io/OpenMaiWaifu/install.sh" | bash
+
+# Windows (PowerShell)
+irm https://buyve.github.io/OpenMaiWaifu/install.ps1 | iex
 ```
 
 ---
@@ -58,9 +62,15 @@ curl -fsSL "https://buyve.github.io/OpenMaiWaifu/install.sh" | bash
 curl -fsSL "https://buyve.github.io/OpenMaiWaifu/install.sh" | bash
 ```
 
+### Install (Windows)
+
+```powershell
+irm https://buyve.github.io/OpenMaiWaifu/install.ps1 | iex
+```
+
 The installer will:
 1. Download the latest release
-2. Install to `/Applications`
+2. Install the app
 3. Walk you through language, name, personality, and AI model setup
 
 ### Manual Download
