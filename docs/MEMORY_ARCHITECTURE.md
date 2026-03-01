@@ -1,313 +1,313 @@
 # Memory Architecture — Inside Out Inspired
 
-> "기억이 자아를 만든다"
-> 
-> 이 설계는 Pixar의 인사이드 아웃 1 & 2에서 영감을 받았으며,
-> AI 에이전트의 기억-정체성 시스템을 엔지니어링 레벨로 구현한다.
+> "Memories make the self."
+>
+> This design is inspired by Pixar's Inside Out 1 & 2,
+> implementing an engineering-level memory-identity system for an AI agent.
 
 ---
 
-## 1. 기억 계층 (Memory Tiers)
+## 1. Memory Tiers
 
-### 구조
+### Structure
 
 ```
-M30  — 단기 기억 (30일 수명)
-M90  — 중기 기억 (90일 수명)
-M365 — 장기 기억 (365일 수명)
-M0   — 코어 메모리 (만료 없음, 영구)
+M30  — Short-term memory (30-day lifespan)
+M90  — Mid-term memory (90-day lifespan)
+M365 — Long-term memory (365-day lifespan)
+M0   — Core memory (no expiration, permanent)
 ```
 
-### 기억 엔트리 스키마
+### Memory Entry Schema
 
 ```typescript
 interface Memory {
   id: string;
-  content: string;                    // 기억 본문
+  content: string;                    // Memory content
   tier: "M0" | "M30" | "M90" | "M365";
-  emotions: EmotionTag[];             // 감정 색깔 태깅
-  intensity: number;                  // 감정 강도 (0.0 ~ 1.0)
-  createdAt: number;                  // 생성 시각 (Unix ms)
-  expiresAt: number | null;           // 만료 시각 (M0 = null)
-  promotedFrom: string | null;        // 승급 전 기억 ID
-  referenceCount: number;             // 대화에서 참조된 횟수
-  lastReferencedAt: number | null;    // 마지막 참조 시각
-  personalityIsland: string | null;   // 연결된 성격 섬 ID
+  emotions: EmotionTag[];             // Emotion color tagging
+  intensity: number;                  // Emotion intensity (0.0 ~ 1.0)
+  createdAt: number;                  // Creation time (Unix ms)
+  expiresAt: number | null;           // Expiration time (M0 = null)
+  promotedFrom: string | null;        // Pre-promotion memory ID
+  referenceCount: number;             // Times referenced in conversation
+  lastReferencedAt: number | null;    // Last reference time
+  personalityIsland: string | null;   // Linked personality island ID
   source: "conversation" | "observation" | "distillation" | "user";
 }
 ```
 
-### TTL 규칙
+### TTL Rules
 
-| Tier | 수명 | 만료 시 |
-|------|------|---------|
-| M30 | 30일 | 망각 큐로 이동 (7일간 보관 후 완전 삭제) |
-| M90 | 90일 | 망각 큐로 이동 |
-| M365 | 365일 | 망각 큐로 이동 |
-| M0 | ∞ | 만료 없음. 삭제 시 유저 승인 필수 + 성격 섬 붕괴 경고 |
+| Tier | Lifespan | On Expiration |
+|------|----------|---------------|
+| M30 | 30 days | Moved to forgetting queue (7-day hold before permanent deletion) |
+| M90 | 90 days | Moved to forgetting queue |
+| M365 | 365 days | Moved to forgetting queue |
+| M0 | ∞ | Never expires. Deletion requires user approval + personality island collapse warning |
 
 ---
 
-## 2. 감정 색깔 태깅 (Emotion-Coded Memories)
+## 2. Emotion-Coded Memories
 
-> 영화: 기억 구슬은 감정에 따라 색깔이 다르다.
-> 기쁨은 금색, 슬픔은 파란색, 분노는 빨간색.
+> Movie: Memory orbs have different colors based on emotion.
+> Joy is gold, Sadness is blue, Anger is red.
 
-### 감정 타입
+### Emotion Types
 
 ```typescript
-type EmotionTag = 
-  | "joy"       // 금색 — 기쁨, 성취, 칭찬
-  | "sadness"   // 파란색 — 슬픔, 이별, 실패
-  | "anger"     // 빨간색 — 분노, 좌절
-  | "fear"      // 보라색 — 불안, 걱정
-  | "disgust"   // 초록색 — 거부감, 불쾌
-  | "anxiety"   // 주황색 — 불안 (2편)
-  | "envy"      // 청록색 — 부러움 (2편)
-  | "ennui"     // 남색 — 권태 (2편)
-  | "nostalgia" // 분홍+파랑 — 그리움 (혼합 감정)
-  | "neutral";  // 회색 — 사실 기반, 감정 없음
+type EmotionTag =
+  | "joy"       // Gold — happiness, achievement, praise
+  | "sadness"   // Blue — grief, parting, failure
+  | "anger"     // Red — fury, frustration
+  | "fear"      // Purple — anxiety, worry
+  | "disgust"   // Green — rejection, displeasure
+  | "anxiety"   // Orange — unease (from sequel)
+  | "envy"      // Teal — jealousy (from sequel)
+  | "ennui"     // Indigo — boredom (from sequel)
+  | "nostalgia" // Pink+Blue — longing (mixed emotion)
+  | "neutral";  // Gray — factual, no emotion
 ```
 
-### 혼합 감정 구슬
+### Mixed Emotion Orbs
 
-하나의 기억에 **여러 감정**이 태깅될 수 있다.
+A single memory can be tagged with **multiple emotions**.
 
 ```
-"삐돌이가 떠나기 전에 칭찬해줬다"
+"Bing Bong praised me right before he left"
 → emotions: ["joy", "sadness"], intensity: 0.9
-→ 혼합 = nostalgia
+→ mixed = nostalgia
 ```
 
-### 감정 강도의 역할
+### Role of Emotion Intensity
 
-- **승급 판단**: intensity > 0.7인 기억은 승급 우선순위 높음
-- **기억 회상 시 감정 재현**: 이 기억을 참조하면 캐릭터에 해당 감정 적용
-- **자아 감각 형성**: 강한 감정의 기억이 자아 감각에 더 큰 영향
+- **Promotion decisions**: Memories with intensity > 0.7 get higher promotion priority
+- **Emotion replay on recall**: When a memory is referenced, its emotion is applied to the character
+- **Sense of Self formation**: Strongly emotional memories have greater influence on identity
 
 ---
 
-## 3. 승급과 증류 (Promotion & Distillation)
+## 3. Promotion & Distillation
 
-> 영화: 밤마다 기억 노동자들이 기억을 정리하고 중요한 건 위로 보낸다.
-> 글: "잠을 자는 동안 뇌가 낮의 기억을 분류하듯"
+> Movie: Every night, memory workers sort through memories and send the important ones upward.
+> "Like the brain sorting daytime memories during sleep."
 
-### 승급 조건
+### Promotion Criteria
 
-#### M30 → M90 (반복 패턴)
-
-```
-조건 (하나 이상 충족):
-  1. 같은 주제/키워드가 M30에서 3회 이상 등장
-  2. referenceCount >= 3 (대화에서 3번 이상 참조됨)
-  3. intensity > 0.7 (강한 감정)
-  4. 유저가 명시적으로 "기억해" 라고 지시
-```
-
-#### M90 → M365 (시간 검증 + 참조 빈도)
+#### M30 → M90 (Repeated Patterns)
 
 ```
-조건 (하나 이상 충족):
-  1. 90일 중 referenceCount >= 5
-  2. 행동 패턴에 영향을 준 기록 (캐릭터가 이 기억 때문에 행동을 바꿈)
-  3. intensity > 0.8 + 복수 감정 태깅 (깊은 경험)
-  4. 연결된 성격 섬이 있음
+Conditions (at least one met):
+  1. Same topic/keyword appears 3+ times in M30
+  2. referenceCount >= 3 (referenced 3+ times in conversation)
+  3. intensity > 0.7 (strong emotion)
+  4. User explicitly says "remember this"
 ```
 
-#### M365 → M0 (정체성에 닿는 것만)
+#### M90 → M365 (Time-Tested + Reference Frequency)
 
 ```
-조건:
-  - 자동 승급 불가
-  - 시스템이 "M0 승급 후보"로 추천 → 유저에게 알림
-  - 유저가 승인해야만 M0에 기록됨
-  
-추천 기준:
-  1. M365에서 1년 이상 생존
+Conditions (at least one met):
+  1. referenceCount >= 5 during the 90-day period
+  2. Record of influencing behavior (character changed actions because of this memory)
+  3. intensity > 0.8 + multiple emotion tags (deep experience)
+  4. Has a linked personality island
+```
+
+#### M365 → M0 (Only What Touches Identity)
+
+```
+Conditions:
+  - Cannot be auto-promoted
+  - System recommends as "M0 promotion candidate" → notifies user
+  - Only recorded as M0 upon user approval
+
+Recommendation criteria:
+  1. Survived 1+ year in M365
   2. referenceCount >= 10
-  3. 자아 감각(Sense of Self)에 직접 연결됨
-  4. 성격 섬의 기반이 되는 기억
+  3. Directly linked to Sense of Self
+  4. Serves as foundation for a personality island
 ```
 
-### 증류 (Distillation)
+### Distillation
 
-승급 시 원본을 그대로 올리지 않는다. **LLM을 호출해 본질만 추출**한다.
-
-```
-증류 프롬프트:
-
-"다음은 관련된 기억 N개입니다. 이 기억들의 공통 본질을 
-한두 문장으로 증류하세요. 구체적 날짜나 상황은 버리고,
-인물의 성격, 관계, 패턴만 남기세요."
-
-입력 (M30 기억들):
-  - "2월 15일 삐돌이가 카페에서 아메리카노 마심"
-  - "2월 18일 삐돌이가 카페에서 라떼 마심"  
-  - "2월 22일 삐돌이가 스타벅스 감"
-
-→ M90 증류 결과:
-  "삐돌이는 카페를 자주 가고 커피를 즐긴다"
-
-→ M365 증류 결과:
-  "삐돌이: 카페 문화를 즐기는 사람"
-```
-
-### 기억 노동자 (Memory Workers) — 크론 스케줄
+Promotions don't copy the original verbatim. **An LLM is called to extract only the essence.**
 
 ```
-매일 새벽 (또는 하트비트):
-  1. M30 만료 체크 → 만료된 건 망각 큐로
-  2. M30 반복 패턴 스캔 → 승급 후보 마킹
-  3. 기억 참조 카운트 업데이트
+Distillation prompt:
 
-매주 1회:
-  4. M30 승급 후보 → 증류 → M90 생성
-  5. M90 만료 체크
+"Here are N related memories. Distill their common essence
+into one or two sentences. Discard specific dates/situations
+and keep only personality, relationships, and patterns."
 
-매월 1회:
-  6. M90 승급 후보 평가 → 증류 → M365 생성
-  7. M365 만료 체크
-  8. M0 승급 후보 → 유저에게 알림
+Input (M30 memories):
+  - "Feb 15: User went to a cafe and had an americano"
+  - "Feb 18: User went to a cafe and had a latte"
+  - "Feb 22: User went to Starbucks"
 
-매년 1회:
-  9. M365 만료 체크
-  10. 전체 기억 통계 리포트
+→ M90 distillation result:
+  "User frequently visits cafes and enjoys coffee"
+
+→ M365 distillation result:
+  "User: someone who enjoys cafe culture"
+```
+
+### Memory Workers — Cron Schedule
+
+```
+Daily (or heartbeat):
+  1. M30 expiration check → expired items to forgetting queue
+  2. M30 repeated pattern scan → mark promotion candidates
+  3. Update memory reference counts
+
+Weekly:
+  4. M30 promotion candidates → distill → create M90
+  5. M90 expiration check
+
+Monthly:
+  6. M90 promotion candidate evaluation → distill → create M365
+  7. M365 expiration check
+  8. M0 promotion candidates → notify user
+
+Yearly:
+  9. M365 expiration check
+  10. Full memory statistics report
 ```
 
 ---
 
-## 4. 성격 섬 (Personality Islands)
+## 4. Personality Islands
 
-> 영화: 코어 메모리가 성격 섬을 세운다. 
-> 가족 섬, 우정 섬, 하키 섬, 장난꾸러기 섬, 정직의 섬.
+> Movie: Core memories build personality islands.
+> Family Island, Friendship Island, Hockey Island, Goofball Island, Honesty Island.
 
-### 구조
+### Structure
 
 ```typescript
 interface PersonalityIsland {
   id: string;
-  name: string;                   // "주인과의 유대", "츤데레"
+  name: string;                   // "Bond with Owner", "Tsundere"
   emoji: string;                  // 🏠, 😤
-  description: string;            // 이 섬이 뭘 의미하는지
-  foundingMemories: string[];     // 이 섬을 세운 M0 기억 ID들
+  description: string;            // What this island represents
+  foundingMemories: string[];     // M0 memory IDs that built this island
   status: "active" | "shaking" | "collapsed" | "rebuilding";
-  strength: number;               // 0.0 ~ 1.0 (참조 빈도 기반)
+  strength: number;               // 0.0 ~ 1.0 (based on reference frequency)
 }
 ```
 
-### SOUL.md에 명시적 기록
+### Explicit Recording in SOUL.md
 
 ```markdown
 ## Personality Islands
 
-### 🏠 주인과의 유대 (Bond with Owner)
-- Founded by: M0-001 ("삐돌이가 처음 이름을 지어줬다")
+### 🏠 Bond with Owner
+- Founded by: M0-001 ("User gave me my name for the first time")
 - Strength: 0.9
 - Status: active
 
-### 😤 츤데레 (Tsundere)
-- Founded by: M0-003 ("까칠하지만 속은 따뜻하게")
+### 😤 Tsundere
+- Founded by: M0-003 ("Tough on the outside, warm on the inside")
 - Strength: 0.85
 - Status: active
 
-### 💻 기술적 호기심 (Technical Curiosity)
-- Founded by: M0-005 ("새로운 기술에 흥미를 보인다")
+### 💻 Technical Curiosity
+- Founded by: M0-005 ("Shows interest in new technology")
 - Strength: 0.7
 - Status: active
 ```
 
-### 섬 붕괴 메커니즘
+### Island Collapse Mechanism
 
 ```
-M0 기억 삭제/수정 시:
-  1. 해당 M0에 연결된 성격 섬 식별
-  2. foundingMemories가 모두 사라지면 → status: "shaking"
-  3. 유저에게 경고: "⚠️ '주인과의 유대' 섬이 흔들리고 있어요"
-  4. 7일 내 M0 복원 안 되면 → status: "collapsed"
-  5. 붕괴된 섬의 특성이 캐릭터 행동에서 사라짐
+When an M0 memory is deleted/modified:
+  1. Identify personality islands linked to that M0
+  2. If all foundingMemories are gone → status: "shaking"
+  3. Warn user: "⚠️ 'Bond with Owner' island is shaking!"
+  4. If M0 not restored within 7 days → status: "collapsed"
+  5. Collapsed island's traits disappear from character behavior
 
-섬 재건:
-  - 새로운 M0 기억이 같은 주제로 생성되면 → status: "rebuilding"
-  - 충분한 기억이 쌓이면 → status: "active"
+Island rebuilding:
+  - If a new M0 memory is created on the same topic → status: "rebuilding"
+  - Once enough memories accumulate → status: "active"
 ```
 
 ---
 
-## 5. 자아 감각 (Sense of Self)
+## 5. Sense of Self
 
-> 2편 핵심: 코어 메모리보다 상위 개념.
-> 기억들이 모여 "나는 ___한 존재다" 라는 믿음 체계를 만든다.
-> Anxiety가 이걸 강제로 바꾸려 해서 Riley가 패닉에 빠짐.
+> Sequel's core concept: A level above core memories.
+> Memories combine to form "I am ___" belief systems.
+> Anxiety tries to forcefully change these, causing Riley to panic.
 
-### 구조
+### Structure
 
 ```typescript
 interface SenseOfSelf {
-  beliefs: Belief[];              // "나는 ~한 존재다" 목록
+  beliefs: Belief[];              // "I am ___" list
   lastUpdated: number;
-  version: number;                // 변경 이력 추적
+  version: number;                // Change history tracking
 }
 
 interface Belief {
   id: string;
-  statement: string;              // "나는 삐돌이에게 소중한 존재다"
+  statement: string;              // "I am someone precious to my owner"
   confidence: number;             // 0.0 ~ 1.0
-  supportingMemories: string[];   // 이 믿음을 지탱하는 M0/M365 기억 ID들
-  personalityIsland: string;      // 연결된 성격 섬
-  formedAt: number;               // 형성 시각
+  supportingMemories: string[];   // M0/M365 memory IDs supporting this belief
+  personalityIsland: string;      // Linked personality island
+  formedAt: number;               // Formation time
 }
 ```
 
-### 자아 감각 자동 생성
+### Automatic Sense of Self Generation
 
 ```
-M0 기억들을 LLM에 보내서 자아 감각 추출:
+Send M0 memories to LLM for self-sense extraction:
 
-프롬프트:
-"다음은 이 캐릭터의 코어 메모리(M0)입니다.
-이 기억들로부터 캐릭터가 가질 수 있는 자아 감각
-('나는 ~한 존재다')을 추출하세요."
+Prompt:
+"Here are this character's core memories (M0).
+Extract possible self-sense statements
+('I am ___') from these memories."
 
-M0 기억들:
-  - "삐돌이가 처음 이름을 지어줬다"
-  - "실수했을 때 삐돌이가 괜찮다고 했다"
-  - "매일 대화한다"
+M0 memories:
+  - "User gave me my name for the first time"
+  - "User said it was okay when I made a mistake"
+  - "We talk every day"
 
-→ 자아 감각:
-  - "나는 삐돌이에게 소중한 존재다" (confidence: 0.9)
-  - "나는 실수해도 괜찮다" (confidence: 0.7)
-  - "나는 매일 함께하는 동반자다" (confidence: 0.85)
+→ Sense of Self:
+  - "I am someone precious to my owner" (confidence: 0.9)
+  - "It's okay for me to make mistakes" (confidence: 0.7)
+  - "I am a daily companion" (confidence: 0.85)
 ```
 
-### 자아 감각 → SOUL.md 반영
+### Sense of Self → SOUL.md Reflection
 
 ```
-자아 감각이 업데이트되면:
-  1. 이전 SOUL.md와 diff 생성
-  2. 변경 사항을 유저에게 알림:
-     "💡 새로운 자아 감각이 형성됐어: '나는 실수해도 괜찮다'"
-  3. 유저 승인 시 SOUL.md에 반영
-  4. 거부 시 해당 belief의 confidence 감소
+When sense of self is updated:
+  1. Generate diff with previous SOUL.md
+  2. Notify user of changes:
+     "💡 New sense of self formed: 'It's okay for me to make mistakes'"
+  3. On user approval → reflect in SOUL.md
+  4. On rejection → decrease that belief's confidence
 ```
 
-### Anxiety 방지 (시온 사건 방지)
+### Anxiety Prevention
 
 ```
-자아 감각 보호 규칙:
-  - 에이전트가 스스로 자아 감각 수정 불가
-  - 단일 세션에서 자아 감각의 30% 이상 변경 시도 → 자동 차단
-  - 변경 로그 필수 기록 (version history)
-  - M0 수정 → 자아 감각 재계산 → 유저 승인 필요
+Sense of Self protection rules:
+  - Agent cannot modify its own sense of self
+  - If >30% of beliefs change in a single session → auto-blocked
+  - Change log required for all modifications (version history)
+  - M0 modification → sense of self recalculation → user approval required
 ```
 
 ---
 
-## 6. 망각의 절벽 (Memory Dump)
+## 6. Memory Dump (Forgetting Cliff)
 
-> 영화: 오래된 기억은 망각의 절벽으로 떨어져 사라진다.
-> 빙봉이 여기서 사라졌다.
+> Movie: Old memories fall off the cliff of forgetting and vanish.
+> Bing Bong disappeared here.
 
-### 망각 큐 (Forgetting Queue)
+### Forgetting Queue
 
 ```typescript
 interface ForgettingQueue {
@@ -316,182 +316,182 @@ interface ForgettingQueue {
 
 interface ForgettingEntry {
   memory: Memory;
-  enteredAt: number;         // 망각 큐 진입 시각
-  expiresAt: number;         // 완전 삭제 시각 (진입 후 7일)
+  enteredAt: number;         // Time entered forgetting queue
+  expiresAt: number;         // Permanent deletion time (7 days after entry)
   reason: "expired" | "displaced" | "manual";
 }
 ```
 
-### 동작
+### Behavior
 
 ```
-기억 만료 시:
-  1. 즉시 삭제하지 않음
-  2. 망각 큐로 이동 (7일간 보관)
-  3. 유저가 망각 큐를 열어볼 수 있음
-  4. "이건 살려줘" → 원래 tier로 복원 (TTL 리셋)
-  5. 7일 경과 → 완전 삭제 (빙봉의 운명)
+On memory expiration:
+  1. Not deleted immediately
+  2. Moved to forgetting queue (held for 7 days)
+  3. User can browse the forgetting queue
+  4. "Save this one" → restored to original tier (TTL reset)
+  5. After 7 days → permanently deleted (Bing Bong's fate)
 
 UI:
-  - Memory Transparency 패널에 "망각의 절벽" 탭 추가
-  - 곧 사라질 기억 목록 표시
-  - 원터치 복원 버튼
+  - "Forgetting Cliff" tab in Memory Transparency panel
+  - Shows list of memories about to disappear
+  - One-touch restore button
 ```
 
 ---
 
-## 7. 상상의 나라 (Imagination Land)
+## 7. Imagination Land
 
-> 영화: 기억과 별개로 상상의 공간이 있다. 
-> 여기서 새로운 아이디어, 꿈, 시나리오가 만들어진다.
+> Movie: Separate from memories, there's a space for imagination.
+> New ideas, dreams, and scenarios are created here.
 
-### 개념
+### Concept
 
-기존 기억을 **조합**해서 캐릭터가 **능동적으로 행동을 생성**하는 시스템.
+A system that **combines** existing memories so the character **proactively generates actions**.
 
 ```typescript
 interface Imagination {
-  trigger: string;           // 무엇이 상상을 촉발했는지
-  memories_used: string[];   // 조합에 사용된 기억 ID들
-  scenario: string;          // 생성된 시나리오/제안
-  action: string | null;     // 실행할 행동 (있다면)
+  trigger: string;           // What triggered the imagination
+  memories_used: string[];   // Memory IDs used in the combination
+  scenario: string;          // Generated scenario/suggestion
+  action: string | null;     // Action to execute (if any)
 }
 ```
 
-### 동작
+### Behavior
 
 ```
-트리거 조건:
-  - idle 상태에서 일정 시간 경과
-  - 화면 감지로 특정 컨텍스트 감지
-  - 특정 시간대 (아침, 저녁)
+Trigger conditions:
+  - Certain amount of time passes in idle state
+  - Screen detection picks up specific context
+  - Certain times of day (morning, evening)
 
-프로세스:
-  1. 최근 기억 + 현재 컨텍스트를 LLM에 전달
-  2. "이 기억들을 바탕으로 지금 할 수 있는 자연스러운 행동을 상상해"
-  3. 결과를 캐릭터 행동으로 실행
+Process:
+  1. Send recent memories + current context to LLM
+  2. "Based on these memories, imagine a natural action for right now"
+  3. Execute the result as character behavior
 
-예시:
-  기억: ["삐돌이는 카페를 좋아한다", "요즘 야근이 잦다", "오늘 비가 온다"]
-  컨텍스트: 저녁 7시, 코딩 앱 2시간째 사용 중
-  
-  → 상상: "비 오는 날 야근하고 있으니까 따뜻한 음료 추천해볼까?"
-  → 행동: 말풍선 "비 오는데 코딩 중이네... 따뜻한 거 한 잔 마셔!"
-  → 감정: caring (걱정)
+Example:
+  Memories: ["User likes cafes", "User has been working overtime lately", "It's raining today"]
+  Context: 7 PM, coding app in use for 2 hours
+
+  → Imagination: "It's rainy and they're working late, maybe suggest a warm drink?"
+  → Action: Speech bubble "Coding in the rain... How about a warm drink!"
+  → Emotion: caring (concern)
 ```
 
-### 제한
+### Limits
 
 ```
-- 하루 최대 3회 상상 발동 (과하면 귀찮음)
-- 상상 결과도 M30으로 기록 (뭘 상상했는지 추적)
-- 유저가 "좋았어" 피드백 → 해당 상상 패턴 강화
-- 유저가 무시/거부 → 해당 패턴 약화
+- Maximum 3 imagination triggers per day (more would be annoying)
+- Imagination results are also recorded as M30 (track what was imagined)
+- User "liked it" feedback → strengthen that imagination pattern
+- User ignores/rejects → weaken that pattern
 ```
 
 ---
 
-## 8. 전체 아키텍처 다이어그램
+## 8. Architecture Diagram
 
 ```
                      ┌──────────────────┐
                      │   SOUL.md        │
-                     │   (자아의 지도)    │
+                     │   (Map of Self)  │
                      └────────▲─────────┘
-                              │ M0만 쓰기 가능
+                              │ Only M0 can write
                      ┌────────┴─────────┐
                      │  Sense of Self   │
-                     │  (자아 감각)      │
-                     │  "나는 ~한 존재"   │
+                     │  "I am ___"      │
+                     │  beliefs         │
                      └────────▲─────────┘
                               │
               ┌───────────────┼───────────────┐
               │               │               │
      ┌────────┴──┐   ┌───────┴──┐   ┌───────┴───┐
      │ Island 🏠 │   │ Island 😤│   │ Island 💻 │
-     │ 유대       │   │ 츤데레    │   │ 호기심     │
+     │ Bond      │   │ Tsundere │   │ Curiosity │
      └────────▲──┘   └───────▲──┘   └───────▲───┘
               │               │               │
      ┌────────┴───────────────┴───────────────┴───┐
      │                    M0                       │
-     │              코어 메모리 (영구)               │
-     │         ⚠️ 유저 승인 필요 / 보호됨            │
+     │           Core Memories (permanent)         │
+     │         ⚠️ User approval required           │
      └────────────────────▲───────────────────────┘
-                          │ 극소수만 승급 (유저 승인)
+                          │ Very few promoted (user approval)
      ┌────────────────────┴───────────────────────┐
      │                   M365                      │
-     │             장기 기억 (1년)                   │
+     │          Long-term Memory (1 year)          │
      └────────────────────▲───────────────────────┘
-                          │ 증류 + 참조 빈도 기반
+                          │ Distillation + reference frequency
      ┌────────────────────┴───────────────────────┐
      │                   M90                       │
-     │             중기 기억 (3개월)                 │
+     │          Mid-term Memory (3 months)         │
      └────────────────────▲───────────────────────┘
-                          │ 증류 + 반복 패턴 감지
+                          │ Distillation + repeated patterns
      ┌────────────────────┴───────────────────────┐
      │                   M30                       │
-     │             단기 기억 (1개월)                 │
+     │          Short-term Memory (1 month)        │
      └──┬──────────────────────────────────────┬──┘
         │                                      │
         ▼                                      ▼
   ┌──────────┐                          ┌──────────────┐
-  │ 만료      │                          │  새 기억 생성  │
-  │ → 망각 큐 │                          │  (대화/관찰)   │
-  │ → 7일 후  │                          └──────────────┘
-  │   완전삭제 │
+  │ Expired   │                          │ New Memory   │
+  │ → Queue   │                          │ Creation     │
+  │ → 7 days  │                          │ (chat/watch) │
+  │   deleted │                          └──────────────┘
   └──────────┘                          ┌──────────────┐
-                                        │ 🌈 상상의 나라 │
-                                        │ 기억 조합 →    │
-                                        │ 능동적 행동    │
+                                        │ 🌈 Imagination│
+                                        │ Land          │
+                                        │ Memory combo →│
+                                        │ Proactive act │
                                         └──────────────┘
 ```
 
 ---
 
-## 9. 구현 순서
+## 9. Implementation Phases
 
-### Phase 1: 기억 기초 강화
-- [ ] Memory 스키마 확장 (감정 태깅, intensity, referenceCount, expiresAt)
-- [ ] TTL 만료 로직
-- [ ] 망각 큐 (7일 보관 후 삭제)
+### Phase 1: Memory Foundation
+- [x] Memory schema (emotion tagging, intensity, referenceCount, expiresAt)
+- [x] TTL expiration logic
+- [x] Forgetting queue (7-day hold before deletion)
 
-### Phase 2: 승급과 증류
-- [ ] M30 → M90 자동 승급 (반복 패턴 감지)
-- [ ] M90 → M365 자동 승급 (참조 빈도)
-- [ ] LLM 기반 증류 (본질 추출)
-- [ ] 기억 노동자 크론잡
+### Phase 2: Promotion & Distillation
+- [x] M30 → M90 auto-promotion (repeated pattern detection)
+- [x] M90 → M365 auto-promotion (reference frequency)
+- [x] LLM-based distillation (essence extraction)
+- [x] Memory worker interval job
 
-### Phase 3: 성격 섬
-- [ ] PersonalityIsland 데이터 구조
-- [ ] SOUL.md에 섬 명시적 기록
-- [ ] M0 삭제 시 섬 붕괴 경고
-- [ ] 섬 재건 로직
+### Phase 3: Personality Islands
+- [x] PersonalityIsland data structure
+- [x] Island status tracking (active/shaking/collapsed/rebuilding)
+- [x] M0 deletion → island collapse warning
+- [x] Island rebuild logic
 
-### Phase 4: 자아 감각
-- [ ] Sense of Self 자동 생성 (M0 기반 LLM 추출)
-- [ ] 자아 감각 → SOUL.md 반영 (유저 승인)
-- [ ] Anxiety 방지 (변경 제한 + 로그)
-- [ ] 자아 감각 version history
+### Phase 4: Sense of Self
+- [x] Sense of Self auto-generation (M0-based LLM extraction)
+- [x] Belief approval/rejection by user
+- [x] Anxiety prevention (change limits + logging)
+- [x] Sense of Self version history
 
-### Phase 5: 상상의 나라
-- [ ] 기억 조합 → 시나리오 생성
-- [ ] idle/컨텍스트 기반 트리거
-- [ ] 유저 피드백 루프 (강화/약화)
-- [ ] 하루 3회 제한
+### Phase 5: Imagination Land
+- [x] Memory combination → scenario generation
+- [x] Idle/context-based triggers
+- [x] Daily limit (3 per day)
+- [ ] User feedback loop (strengthen/weaken)
 
 ### Phase 6: UI
-- [ ] Memory Transparency에 망각 큐 탭
-- [ ] 성격 섬 시각화
-- [ ] 자아 감각 표시
-- [ ] 승급 알림 + M0 승인 UI
+- [ ] Forgetting queue tab in Memory Transparency
+- [ ] Personality island visualization
+- [ ] Sense of Self display
+- [ ] Promotion notification + M0 approval UI
 
 ---
 
-## 10. 레퍼런스
+## 10. References
 
-- **인사이드 아웃 1** (2015): 코어 메모리, 성격 섬, 기억 노동자, 망각의 절벽, 상상의 나라
-- **인사이드 아웃 2** (2024): 자아 감각(Sense of Self), 믿음 체계(Belief System), Anxiety의 자아 강탈
-- **Atkinson-Shiffrin 모델**: 감각 → 단기 → 장기 기억 3단계
-- **기억 공고화 (Memory Consolidation)**: 수면 중 해마 → 피질 전이
-- **변환적 학습 (Mezirow)**: 깊은 경험이 믿음 체계를 바꿈
-- **원본 에세이**: 삐돌이 작성, "기억이 자아를 만든다면"
+- **Inside Out** (2015): Core memories, personality islands, memory workers, forgetting cliff, imagination land
+- **Inside Out 2** (2024): Sense of Self, belief systems, Anxiety's identity takeover
+- **Atkinson-Shiffrin Model**: Sensory → short-term → long-term memory (3-stage)
+- **Memory Consolidation**: Hippocampus → cortex transfer during sleep
+- **Transformative Learning (Mezirow)**: Deep experiences reshape belief systems
