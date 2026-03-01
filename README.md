@@ -7,7 +7,7 @@
 </h1>
 
 <p align="center">
-  <strong>AI Desktop Companion with Memory, Personality & Emotions</strong>
+  <strong>AI Desktop Waifu with Memory, Personality & Emotions</strong>
 </p>
 
 <p align="center">
@@ -27,9 +27,9 @@
 
 ---
 
-OpenMaiWaifu is an open-source AI desktop companion that lives on your screen as a VRM character. It watches what you're doing, remembers your conversations, and develops its own personality over time — inspired by Pixar's *Inside Out*. Memories have emotions, get promoted through four tiers (short-term → core), and shape the character's identity through Personality Islands and "I am ___" beliefs.
+OpenMaiWaifu is an open-source AI desktop waifu that lives on your screen as a VRM character. It watches what you're doing, remembers your conversations, and develops its own personality over time — inspired by Pixar's *Inside Out*. Memories have emotions, get promoted through four tiers (short-term → core), and shape the character's identity through Personality Islands and "I am ___" beliefs.
 
-Unlike static chatbots, this companion is **always present**. It sits on your taskbar with real physics, reacts to your active app ("Still on YouTube?", "2 hours of coding — drink some water!"), and generates autonomous thoughts by combining memories with context. Conversations go through [OpenClaw](https://github.com/openclaw/openclaw) to your chosen LLM (Anthropic, OpenAI, Gemini, Copilot) — everything runs locally, nothing leaves your machine unless you chat.
+Unlike static chatbots, this waifu is **always present**. It sits on your taskbar with real physics, reacts to your active app ("Still on YouTube?", "2 hours of coding — drink some water!"), and generates autonomous thoughts by combining memories with context. Conversations go through [OpenClaw](https://github.com/openclaw/openclaw) to your chosen LLM (Anthropic, OpenAI, Gemini, Copilot) — everything runs locally, nothing leaves your machine unless you chat.
 
 If you want a desktop character that actually **knows you** and grows with you, this is it.
 
@@ -265,7 +265,7 @@ The app stores configuration at:
 - [ ] Voice input/output (TTS/STT)
 - [ ] Linux support
 - [ ] Plugin system for custom behaviors
-- [ ] Mobile companion app
+- [ ] Mobile waifu app
 
 ---
 
