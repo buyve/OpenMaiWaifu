@@ -63,19 +63,19 @@ Grab the latest build from [Releases](https://github.com/buyve/OpenMaiWaifu/rele
 ┌─────────────────────────────────────────────────────────┐
 │  Transparent Tauri Window (always-on-top, full screen)  │
 │                                                         │
-│   ┌──────────┐   ┌──────────┐   ┌──────────────────┐   │
-│   │ VRM      │   │ Speech   │   │ Chat Window      │   │
-│   │ Viewer   │   │ Bubble   │   │ (expandable)     │   │
-│   │ Three.js │   │          │   │                  │   │
-│   └──────────┘   └──────────┘   └──────────────────┘   │
+│   ┌──────────┐   ┌──────────┐   ┌──────────────────┐    │
+│   │ VRM      │   │ Speech   │   │ Chat Window      │    │
+│   │ Viewer   │   │ Bubble   │   │ (expandable)     │    │
+│   │ Three.js │   │          │   │                  │    │
+│   └──────────┘   └──────────┘   └──────────────────┘    │
 │        │                                                │
 │   ┌────┴─────────────────────────────────────────────┐  │
 │   │  React Frontend (TypeScript)                     │  │
-│   │  ┌─────────┐ ┌─────────┐ ┌───────┐ ┌─────────┐ │  │
-│   │  │ Comment │ │ Memory  │ │ Sense │ │ Emotion │ │  │
-│   │  │ Engine  │ │ Manager │ │ of    │ │ State   │ │  │
-│   │  │         │ │ (4-tier)│ │ Self  │ │ Machine │ │  │
-│   │  └─────────┘ └─────────┘ └───────┘ └─────────┘ │  │
+│   │  ┌─────────┐ ┌─────────┐ ┌───────┐ ┌─────────┐   │  │
+│   │  │ Comment │ │ Memory  │ │ Sense │ │ Emotion │   │  │
+│   │  │ Engine  │ │ Manager │ │ of    │ │ State   │   │  │
+│   │  │         │ │ (4-tier)│ │ Self  │ │ Machine │   │  │
+│   │  └─────────┘ └─────────┘ └───────┘ └─────────┘   │  │
 │   └──────────────────────────────────────────────────┘  │
 │        │ IPC                                            │
 │   ┌────┴─────────────────────────────────────────────┐  │
@@ -85,8 +85,8 @@ Grab the latest build from [Releases](https://github.com/buyve/OpenMaiWaifu/rele
 └─────────────────────────────────────────────────────────┘
          │
     ┌────┴────┐
-    │ OpenClaw │  Local AI gateway (LLM routing)
-    │ Gateway  │  Anthropic · OpenAI · Gemini · Copilot
+    │ OpenClaw│  Local AI gateway (LLM routing)
+    │ Gateway │  Anthropic · OpenAI · Gemini · Copilot
     └─────────┘
 ```
 
