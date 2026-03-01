@@ -3,7 +3,7 @@
 #  AI Desktop Companion — Install & Setup Script
 #
 #  Usage:
-#    curl -fsSL https://raw.githubusercontent.com/buyve/OpenMaiWaifu/main/scripts/install.sh | bash
+#    curl -fsSL https://buyve.github.io/OpenMaiWaifu/install.sh | bash
 #
 #  What it does:
 #    1. Download the latest release for your platform
