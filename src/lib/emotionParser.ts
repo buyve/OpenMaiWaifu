@@ -29,6 +29,8 @@ const VALID_MOTIONS = new Set(["wave", "nod", "shake", "idle"]);
 const EMOTION_TAG_REGEX = /\[emotion:(\w+)\]/gi;
 const MOTION_TAG_REGEX = /\[motion:(\w+)\]/gi;
 
+import { locale } from "./i18n";
+
 // ---------- Sentiment keyword map ----------
 
 interface SentimentRule {
@@ -36,24 +38,15 @@ interface SentimentRule {
   emotion: string;
 }
 
-const SENTIMENT_RULES: SentimentRule[] = [
-  {
-    keywords: ["하하", "ㅋㅋ", "좋", "great", "nice", "기뻐", "행복", "즐거"],
-    emotion: "happy",
-  },
-  {
-    keywords: ["슬프", "아쉽", "sorry", "미안", "울", "눈물"],
-    emotion: "sad",
-  },
-  {
-    keywords: ["화나", "짜증", "angry", "열받", "분노"],
-    emotion: "angry",
-  },
-  {
-    keywords: ["놀라", "깜짝", "surprise", "대박", "헐"],
-    emotion: "surprised",
-  },
-];
+function getSentimentRules(): SentimentRule[] {
+  const l = locale();
+  return [
+    { keywords: l.sentiment_happy_keywords, emotion: "happy" },
+    { keywords: l.sentiment_sad_keywords, emotion: "sad" },
+    { keywords: l.sentiment_angry_keywords, emotion: "angry" },
+    { keywords: l.sentiment_surprised_keywords, emotion: "surprised" },
+  ];
+}
 
 // ---------- Parser ----------
 
@@ -124,7 +117,7 @@ export function parseResponse(raw: string | null | undefined): ParsedResponse {
 function inferSentiment(text: string): string {
   const lower = text.toLowerCase();
 
-  for (const rule of SENTIMENT_RULES) {
+  for (const rule of getSentimentRules()) {
     for (const keyword of rule.keywords) {
       if (lower.includes(keyword)) {
         return rule.emotion;

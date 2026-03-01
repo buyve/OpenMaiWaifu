@@ -8,6 +8,7 @@
 import type { Memory, EmotionTag } from "./memoryManager.ts";
 import { sendChat } from "./openclaw.ts";
 import { log } from "./logger.ts";
+import { locale } from "./i18n";
 import {
   LLM_DISTILL_MAX_MEMORIES,
   LLM_IMAGINATION_MAX_MEMORIES,
@@ -145,16 +146,7 @@ export async function distillMemories(
     .map((m, i) => `${i + 1}. [${m.emotions.join("+")}] ${m.content}`)
     .join("\n");
 
-  const prompt = `[기억 증류 요청]
-너는 기억 증류기야. 여러 기억의 공통 본질을 한두 문장으로 추출해.
-구체적 날짜/상황은 버리고, 성격/관계/패턴만 남겨.
-대상 티어: ${targetTier}
-
-[기억 목록]
-${memoryList}
-
-반드시 아래 JSON 형식으로만 응답해:
-{"distilled":"증류된 내용","emotions":["joy"],"intensity":0.7}`;
+  const prompt = locale().llm_distill_prompt(targetTier, memoryList);
 
   try {
     const res = await sendChat(prompt);
@@ -190,24 +182,16 @@ export async function generateImagination(
 
   const recentList = recentActions.length > 0
     ? recentActions.map((a) => `- ${a}`).join("\n")
-    : "없음";
+    : "";
 
-  const prompt = `[상상력 생성 요청]
-너는 데스크톱 캐릭터의 상상력이야. 츤데레 말투로 15~40자 한마디를 만들어.
-
-[기억]
-${memoryList || "기억 없음"}
-
-[현재 상황]
-시간: ${context.hour}시, 요일: ${context.dayOfWeek}
-앱: ${context.currentApp ?? "없음"}
-유휴: ${context.isIdle ? "예" : "아니오"}
-
-[최근 상상]
-${recentList}
-
-반드시 아래 JSON 형식으로만 응답해:
-{"action":"츤데레 한마디","emotion":"joy","scenario":"상황 설명(영어)"}`;
+  const prompt = locale().llm_imagination_prompt({
+    memoryList,
+    hour: context.hour,
+    dayOfWeek: context.dayOfWeek,
+    currentApp: context.currentApp,
+    isIdle: context.isIdle,
+    recentList,
+  });
 
   try {
     const res = await sendChat(prompt);
@@ -242,20 +226,9 @@ export async function extractBeliefs(
 
   const beliefList = existingBeliefs.length > 0
     ? existingBeliefs.map((b) => `- ${b}`).join("\n")
-    : "없음";
+    : "";
 
-  const prompt = `[자아 감각 추출 요청]
-코어 메모리에서 "나는 ~한 존재다" 자아 감각을 추출해.
-기존 믿음과 중복되지 않는 것만 추출해. 최대 3개.
-
-[M0 기억]
-${memoryList}
-
-[기존 믿음]
-${beliefList}
-
-반드시 아래 JSON 형식으로만 응답해:
-{"beliefs":[{"statement":"나는 ...","confidence":0.5,"memoryIds":["id1"]}]}`;
+  const prompt = locale().llm_belief_prompt(memoryList, beliefList);
 
   try {
     const res = await sendChat(prompt);

@@ -3,6 +3,8 @@ import type { PrivacySettings } from "../lib/privacyManager.ts";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { invoke } from "@tauri-apps/api/core";
 import { log } from "../lib/logger.ts";
+import { locale, getLocaleCode, setLocale, LOCALE_OPTIONS } from "../lib/i18n";
+import type { SupportedLocale } from "../lib/i18n";
 import OpenClawSettings from "./settings/OpenClawSettings.tsx";
 import BehaviorSettings from "./settings/BehaviorSettings.tsx";
 import PrivacySettingsCard from "./settings/PrivacySettings.tsx";
@@ -42,14 +44,14 @@ function AutostartToggle() {
       }
     } catch (err) {
       log.error("[Settings] autostart toggle failed:", err);
-      setError("Failed to change autostart setting.");
+      setError(locale().ui_autostart_error);
     }
   }, [enabled]);
 
   return (
     <div className="settings-row" style={{ flexDirection: "column", alignItems: "stretch" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span className="settings-row-label">Auto-start on Login</span>
+        <span className="settings-row-label">{locale().ui_autostart}</span>
         <Toggle checked={enabled} onChange={toggle} disabled={loading} />
       </div>
       {error && (
@@ -82,7 +84,7 @@ function ResourceUsage({ isOpen }: { isOpen: boolean }) {
 
   return (
     <span className="settings-row-value">
-      {memoryMb !== null ? `Memory: ${memoryMb} MB` : "-"}
+      {memoryMb !== null ? locale().ui_memory_format(memoryMb) : "-"}
     </span>
   );
 }
@@ -151,21 +153,21 @@ export default function Settings({
       <div className="settings-container">
         {/* Header */}
         <div className="settings-header">
-          <span className="settings-title">Settings</span>
+          <span className="settings-title">{locale().ui_settings_title}</span>
           <button className="settings-close-btn" onClick={onClose}>
-            ESC
+            {locale().ui_settings_close}
           </button>
         </div>
 
         {/* ============ Character ============ */}
         <div className="settings-card">
-          <div className="settings-card-title">Character</div>
+          <div className="settings-card-title">{locale().ui_character_title}</div>
 
           <div className="settings-row">
             <div className="settings-row-label">
-              VRM Model
+              {locale().ui_vrm_model}
               <div className="settings-row-sublabel">
-                Drag & drop or select a .vrm file
+                {locale().ui_vrm_sublabel}
               </div>
             </div>
             <span className="settings-model-name">
@@ -180,10 +182,10 @@ export default function Settings({
                 className="settings-btn primary"
                 onClick={() => fileInputRef.current?.click()}
               >
-                Choose File
+                {locale().ui_choose_file}
               </button>
               <button className="settings-btn" onClick={onModelReset}>
-                Reset
+                {locale().ui_reset}
               </button>
             </div>
             <input
@@ -213,24 +215,43 @@ export default function Settings({
 
         {/* ============ System ============ */}
         <div className="settings-card">
-          <div className="settings-card-title">System</div>
+          <div className="settings-card-title">{locale().ui_system_title}</div>
+
+          {/* Language selector */}
+          <div className="settings-row">
+            <span className="settings-row-label">{locale().ui_language}</span>
+            <select
+              className="settings-select"
+              value={getLocaleCode()}
+              onChange={async (e) => {
+                await setLocale(e.target.value as SupportedLocale);
+                window.location.reload();
+              }}
+            >
+              {LOCALE_OPTIONS.map((opt) => (
+                <option key={opt.code} value={opt.code}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <AutostartToggle />
 
           <div className="settings-row">
-            <span className="settings-row-label">Resource Usage</span>
+            <span className="settings-row-label">{locale().ui_resource_usage}</span>
             <ResourceUsage isOpen={isOpen} />
           </div>
 
           <div className="settings-row">
-            <span className="settings-row-label">App Version</span>
+            <span className="settings-row-label">{locale().ui_app_version}</span>
             <span className="settings-row-value">{APP_VERSION}</span>
           </div>
         </div>
 
         {/* Version footer */}
         <div className="settings-version">
-          AI Desktop Companion v{APP_VERSION}
+          {locale().ui_version_footer(APP_VERSION)}
         </div>
       </div>
     </div>

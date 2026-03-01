@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   classifyMotionPersonality,
   SoulManager,
-  DEFAULT_SOUL,
+  getDefaultSoul,
 } from "../soulIdentity";
 
 // Mock localStorage
@@ -86,9 +86,9 @@ describe("SoulManager", () => {
     vi.clearAllMocks();
   });
 
-  it("starts with DEFAULT_SOUL when no saved data", () => {
+  it("starts with getDefaultSoul() when no saved data", () => {
     const sm = new SoulManager();
-    expect(sm.getSoul()).toBe(DEFAULT_SOUL);
+    expect(sm.getSoul()).toBe(getDefaultSoul());
   });
 
   it("loads saved soul from localStorage", () => {
@@ -107,11 +107,11 @@ describe("SoulManager", () => {
     );
   });
 
-  it("reset restores DEFAULT_SOUL", () => {
+  it("reset restores getDefaultSoul()", () => {
     const sm = new SoulManager();
     sm.setSoul("temporary");
     sm.reset();
-    expect(sm.getSoul()).toBe(DEFAULT_SOUL);
+    expect(sm.getSoul()).toBe(getDefaultSoul());
   });
 
   it("getMotionPersonality classifies from soul text", () => {

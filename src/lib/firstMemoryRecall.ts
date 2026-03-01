@@ -7,6 +7,8 @@ export interface RecallMoment {
   motion: string;
 }
 
+import { locale } from "./i18n";
+
 // ---------- Constants ----------
 
 const FIRST_RECALL_KEY = "companion_first_recall_triggered";
@@ -17,26 +19,6 @@ const FIRST_RECALL_KEY = "companion_first_recall_triggered";
  * might just be echoing back data it was given moments ago.
  */
 const MIN_CHAT_COUNT = 5;
-
-/**
- * Korean phrases that indicate the companion is referencing a past conversation.
- */
-const RECALL_PHRASES = [
-  "전에",
-  "지난번에",
-  "기억나",
-  "예전에",
-  "그때",
-  "저번에",
-  "아까",
-  "말했던",
-  "했었지",
-  "했었잖아",
-  "기억해",
-  "remember",
-  "last time",
-  "before",
-];
 
 // ---------- Detection ----------
 
@@ -80,8 +62,8 @@ export function checkForRecallMoment(
   return {
     detected: true,
     text: contextHint
-      ? `아! 맞다, 전에 ${contextHint}라고 했었지!`
-      : "아! 맞다, 전에 그런 얘기 했었지!",
+      ? locale().recall_with_context(contextHint)
+      : locale().recall_without_context,
     emotion: "surprised",
     motion: "nod",
   };
@@ -114,7 +96,7 @@ export function resetRecallTrigger(): void {
 /** Find the first recall phrase that appears in the response. */
 function findRecallPhrase(response: string): string | null {
   const lower = response.toLowerCase();
-  for (const phrase of RECALL_PHRASES) {
+  for (const phrase of locale().recall_phrases) {
     if (lower.includes(phrase.toLowerCase())) {
       return phrase;
     }

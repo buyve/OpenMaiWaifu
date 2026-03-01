@@ -10,6 +10,7 @@ import type { Memory, EmotionTag } from "./memoryManager.ts";
 import type { AppSession } from "../hooks/useScreenWatch.ts";
 import { log } from "./logger.ts";
 import { generateImagination } from "./llmService.ts";
+import { locale } from "./i18n";
 
 // ---------- Types ----------
 
@@ -75,60 +76,63 @@ export interface ImaginationContext {
   isIdle: boolean;    // No app change for > 5 min
 }
 
-const TEMPLATES: ImaginationTemplate[] = [
-  {
-    id: "late_work_care",
-    match: (_mem, ctx) => ctx.hour >= 20 && ctx.currentApp !== null && !ctx.isIdle,
-    generate: (_mem, ctx) => ({
-      action: `${ctx.hour >= 22 ? "이 시간까지 뭐 하는 거야..." : "저녁인데 아직 하는 거 있어?"} 좀 쉬어!`,
-      emotion: "sadness" as EmotionTag,
-      scenario: "User is working late, character shows concern",
-    }),
-  },
-  {
-    id: "morning_greeting",
-    match: (_mem, ctx) => ctx.hour >= 7 && ctx.hour <= 9 && ctx.isIdle,
-    generate: () => ({
-      action: "좋은 아침! ...아, 아니 그냥 인사한 거야. 의미 두지 마.",
-      emotion: "joy" as EmotionTag,
-      scenario: "Morning greeting with tsundere flavor",
-    }),
-  },
-  {
-    id: "weekend_idle",
-    match: (_mem, ctx) => (ctx.dayOfWeek === 0 || ctx.dayOfWeek === 6) && ctx.isIdle && ctx.hour >= 10 && ctx.hour <= 18,
-    generate: () => ({
-      action: "주말인데 뭐 안 해? ...나랑 얘기하라는 건 아닌데.",
-      emotion: "ennui" as EmotionTag,
-      scenario: "Weekend idle, character is bored",
-    }),
-  },
-  {
-    id: "coding_encourage",
-    match: (_mem, ctx) => {
-      if (!ctx.currentApp) return false;
-      const app = ctx.currentApp.appName.toLowerCase();
-      return (app.includes("code") || app.includes("cursor") || app.includes("xcode")) && ctx.currentApp.duration > 3600;
+function getTemplates(): ImaginationTemplate[] {
+  const l = locale();
+  return [
+    {
+      id: "late_work_care",
+      match: (_mem, ctx) => ctx.hour >= 20 && ctx.currentApp !== null && !ctx.isIdle,
+      generate: (_mem, ctx) => ({
+        action: l.imagination_late_work(ctx.hour >= 22),
+        emotion: "sadness" as EmotionTag,
+        scenario: "User is working late, character shows concern",
+      }),
     },
-    generate: (_mem, ctx) => ({
-      action: `${Math.floor((ctx.currentApp?.duration ?? 0) / 3600)}시간째 코딩 중이네... 대단하긴 한데, 물 좀 마셔.`,
-      emotion: "anxiety" as EmotionTag,
-      scenario: "Long coding session, mixed admiration and concern",
-    }),
-  },
-  {
-    id: "memory_recall",
-    match: (mem) => mem.length > 0 && Math.random() < 0.3,
-    generate: (mem) => {
-      const randomMem = mem[Math.floor(Math.random() * mem.length)];
-      return {
-        action: `갑자기 생각났는데... "${randomMem.content.slice(0, 30)}" 이거 기억나?`,
-        emotion: "nostalgia" as EmotionTag,
-        scenario: `Recalling memory: ${randomMem.content.slice(0, 50)}`,
-      };
+    {
+      id: "morning_greeting",
+      match: (_mem, ctx) => ctx.hour >= 7 && ctx.hour <= 9 && ctx.isIdle,
+      generate: () => ({
+        action: l.imagination_morning,
+        emotion: "joy" as EmotionTag,
+        scenario: "Morning greeting with tsundere flavor",
+      }),
     },
-  },
-];
+    {
+      id: "weekend_idle",
+      match: (_mem, ctx) => (ctx.dayOfWeek === 0 || ctx.dayOfWeek === 6) && ctx.isIdle && ctx.hour >= 10 && ctx.hour <= 18,
+      generate: () => ({
+        action: l.imagination_weekend,
+        emotion: "ennui" as EmotionTag,
+        scenario: "Weekend idle, character is bored",
+      }),
+    },
+    {
+      id: "coding_encourage",
+      match: (_mem, ctx) => {
+        if (!ctx.currentApp) return false;
+        const app = ctx.currentApp.appName.toLowerCase();
+        return (app.includes("code") || app.includes("cursor") || app.includes("xcode")) && ctx.currentApp.duration > 3600;
+      },
+      generate: (_mem, ctx) => ({
+        action: l.imagination_coding(Math.floor((ctx.currentApp?.duration ?? 0) / 3600)),
+        emotion: "anxiety" as EmotionTag,
+        scenario: "Long coding session, mixed admiration and concern",
+      }),
+    },
+    {
+      id: "memory_recall",
+      match: (mem) => mem.length > 0 && Math.random() < 0.3,
+      generate: (mem) => {
+        const randomMem = mem[Math.floor(Math.random() * mem.length)];
+        return {
+          action: l.imagination_memory_recall(randomMem.content.slice(0, 30)),
+          emotion: "nostalgia" as EmotionTag,
+          scenario: `Recalling memory: ${randomMem.content.slice(0, 50)}`,
+        };
+      },
+    },
+  ];
+}
 
 // ---------- Imagination Engine ----------
 
@@ -166,7 +170,7 @@ export class ImaginationEngine {
     const recentActions = this.history.slice(-3).map((h) => h.action);
 
     // Day-of-week names for LLM context
-    const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const dayNames = locale().imagination_day_names;
 
     // Try LLM first
     const llmResult = await generateImagination(
@@ -185,7 +189,7 @@ export class ImaginationEngine {
     }
 
     // Fallback: try each template
-    for (const template of TEMPLATES) {
+    for (const template of getTemplates()) {
       if (template.match(memories, context)) {
         const result = template.generate(memories, context);
         return this.createImagination(template.id, memories, result, now);

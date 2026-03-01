@@ -15,6 +15,7 @@ interface FirstRunSettings {
   commentFrequency: string;
   ftueComplete: boolean;
   soul?: string;
+  locale?: string;
 }
 
 // localStorage keys (must match the rest of the app)
@@ -76,6 +77,11 @@ export async function applyFirstRunSettings(): Promise<boolean> {
     // Soul identity (personality + motion personality)
     if (settings.soul) {
       localStorage.setItem(SOUL_IDENTITY_KEY, settings.soul);
+    }
+
+    // Locale (language selection from install wizard)
+    if (settings.locale) {
+      localStorage.setItem("companion_locale", settings.locale);
     }
 
     // Delete the firstrun file so this never runs again

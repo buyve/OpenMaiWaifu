@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { log } from "./logger.ts";
 import { distillMemories } from "./llmService.ts";
+import { locale } from "./i18n";
 import {
   TOPIC_CLUSTER_MIN_SIZE,
   TOPIC_CLUSTER_MIN_OVERLAP,
@@ -122,19 +123,22 @@ export const TIER_ORDER: string[] = ["M0", "M30", "M90", "M365"];
 
 // ---------- Emotion Detection ----------
 
-/** Keyword-based emotion detection (no LLM required). */
-const EMOTION_KEYWORDS: Record<EmotionTag, string[]> = {
-  joy: ["좋아", "행복", "기쁨", "칭찬", "최고", "감사", "사랑", "happy", "great", "love", "thanks", "awesome", "nice", "좋은", "잘했", "축하"],
-  sadness: ["슬프", "슬픔", "우울", "힘들", "아프", "외로", "그리", "sad", "miss", "lonely", "pain", "hurt", "떠나", "이별", "울"],
-  anger: ["화나", "짜증", "분노", "싫어", "열받", "angry", "hate", "annoying", "frustrated", "못", "왜"],
-  fear: ["무섭", "두려", "걱정", "불안", "afraid", "scared", "worry", "fear", "위험"],
-  disgust: ["역겹", "싫", "구역", "gross", "disgusting", "terrible", "worst", "최악"],
-  anxiety: ["불안", "초조", "긴장", "스트레스", "압박", "anxious", "stress", "nervous", "overwhelm", "panic"],
-  envy: ["부럽", "질투", "envious", "jealous", "envy", "부러"],
-  ennui: ["지루", "따분", "심심", "무료", "boring", "bored", "meh", "귀찮"],
-  nostalgia: ["그리움", "추억", "옛날", "그때", "remember when", "nostalgia", "old days", "이전"],
-  neutral: [],
-};
+/** Keyword-based emotion detection using locale strings. */
+function getEmotionKeywords(): Record<EmotionTag, string[]> {
+  const l = locale();
+  return {
+    joy: l.emotion_joy_keywords,
+    sadness: l.emotion_sadness_keywords,
+    anger: l.emotion_anger_keywords,
+    fear: l.emotion_fear_keywords,
+    disgust: l.emotion_disgust_keywords,
+    anxiety: l.emotion_anxiety_keywords,
+    envy: l.emotion_envy_keywords,
+    ennui: l.emotion_ennui_keywords,
+    nostalgia: l.emotion_nostalgia_keywords,
+    neutral: [],
+  };
+}
 
 /**
  * Detect emotions from text using keyword matching.
@@ -144,7 +148,8 @@ export function detectEmotion(text: string): { emotions: EmotionTag[]; intensity
   const lower = text.toLowerCase();
   const hits: { tag: EmotionTag; count: number }[] = [];
 
-  for (const [tag, keywords] of Object.entries(EMOTION_KEYWORDS) as [EmotionTag, string[]][]) {
+  const emotionKeywords = getEmotionKeywords();
+  for (const [tag, keywords] of Object.entries(emotionKeywords) as [EmotionTag, string[]][]) {
     if (tag === "neutral") continue;
     let count = 0;
     for (const kw of keywords) {
@@ -1014,7 +1019,7 @@ export class MemoryManager {
 
   /** Extract significant keywords from content (>2 chars, lowercased). */
   private extractKeywords(content: string): Set<string> {
-    const stopwords = new Set(["the", "and", "for", "are", "but", "not", "you", "all", "can", "was", "one", "our", "has", "이", "그", "저", "것", "수", "를", "에", "의", "가", "은", "는", "을", "도", "로"]);
+    const stopwords = new Set(locale().stopwords);
     const tokens = content.toLowerCase().split(/[\s,.!?;:'"()\[\]{}<>\/\\|@#$%^&*+=~`]+/);
     const keywords = new Set<string>();
     for (const t of tokens) {

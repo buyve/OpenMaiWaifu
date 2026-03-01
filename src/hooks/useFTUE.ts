@@ -3,13 +3,12 @@ import { invoke } from "@tauri-apps/api/core";
 import type { ChatMessage } from "../components/ChatWindow";
 import type { MemoryManager } from "../lib/memoryManager.ts";
 import { FTUE_AUTO_OPEN_DELAY_MS, FTUE_WAVE_DELAY_MS } from "../lib/constants.ts";
+import { locale } from "../lib/i18n";
 
 // ---------- Constants ----------
 
 const FTUE_COMPLETE_KEY = "companion_ftue_complete";
 const USER_NAME_KEY = "companion_user_name";
-const FTUE_GREETING = "안녕! 만나서 반가워!";
-const FTUE_NAME_QUESTION = "너의 이름이 뭐야?";
 
 // ---------- Types ----------
 
@@ -70,7 +69,7 @@ export function useFTUE({
 
     // Phase 1: Show greeting speech bubble + wave animation
     setFtuePhase("greeting");
-    showSpeechBubble(FTUE_GREETING);
+    showSpeechBubble(locale().ftue_greeting);
 
     // Trigger wave animation
     const waveTimer = setTimeout(() => {
@@ -83,7 +82,7 @@ export function useFTUE({
       const nameMsg: ChatMessage = {
         id: generateId(),
         role: "character",
-        text: FTUE_NAME_QUESTION,
+        text: locale().ftue_name_question,
         timestamp: Date.now(),
       };
       setFtueMessages([nameMsg]);
@@ -106,7 +105,7 @@ export function useFTUE({
           localStorage.setItem(USER_NAME_KEY, userName);
           localStorage.setItem(FTUE_COMPLETE_KEY, "true");
 
-          const responseText = `${userName}! 좋은 이름이야. 앞으로 잘 지내자!`;
+          const responseText = locale().ftue_name_response(userName);
 
           const userMsg: ChatMessage = {
             id: generateId(),

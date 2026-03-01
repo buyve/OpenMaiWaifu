@@ -12,6 +12,7 @@ import type { Memory } from "./memoryManager.ts";
 import { extractBeliefs } from "./llmService.ts";
 import { LLM_BELIEF_MIN_M0_COUNT } from "./constants.ts";
 import { log } from "./logger.ts";
+import { locale } from "./i18n";
 
 // ---------- Types ----------
 
@@ -113,7 +114,7 @@ export class SenseOfSelfManager {
       return {
         type: "anxiety_blocked",
         belief: { id: "", statement, confidence: 0, supportingMemories, personalityIsland, formedAt: Date.now(), userApproved: false },
-        message: "⚠️ 너무 많은 변화가 한꺼번에 일어나고 있어... 잠깐 멈출게.",
+        message: locale().self_anxiety_blocked,
       };
     }
 
@@ -143,7 +144,7 @@ export class SenseOfSelfManager {
     return {
       type: "belief_formed",
       belief,
-      message: `💡 새로운 자아 감각이 형성됐어: "${statement}"`,
+      message: locale().self_belief_formed(statement),
     };
   }
 
@@ -162,7 +163,7 @@ export class SenseOfSelfManager {
     return {
       type: "belief_strengthened",
       belief,
-      message: `✨ "${belief.statement}" — 이제 나의 일부야.`,
+      message: locale().self_belief_approved(belief.statement),
     };
   }
 
@@ -185,7 +186,7 @@ export class SenseOfSelfManager {
       return {
         type: "belief_removed",
         belief,
-        message: `"${belief.statement}" — 아직 확신이 없나 봐...`,
+        message: locale().self_belief_rejected_removed(belief.statement),
       };
     }
 
@@ -194,7 +195,7 @@ export class SenseOfSelfManager {
     return {
       type: "belief_weakened",
       belief,
-      message: `"${belief.statement}" — 좀 더 생각해볼게.`,
+      message: locale().self_belief_rejected_weakened(belief.statement),
     };
   }
 
@@ -218,7 +219,7 @@ export class SenseOfSelfManager {
     return {
       type: "belief_strengthened",
       belief,
-      message: `${belief.statement} — 더 확실해졌어.`,
+      message: locale().self_belief_strengthened(belief.statement),
     };
   }
 
@@ -239,13 +240,13 @@ export class SenseOfSelfManager {
         events.push({
           type: "belief_removed",
           belief,
-          message: `"${belief.statement}" — 이 믿음을 지탱할 기억이 더 이상 없어...`,
+          message: locale().self_memory_removed(belief.statement),
         });
       } else {
         events.push({
           type: "belief_weakened",
           belief,
-          message: `"${belief.statement}" — 이 믿음이 흔들리고 있어... (${(belief.confidence * 100).toFixed(0)}%)`,
+          message: locale().self_memory_weakened(belief.statement, `${(belief.confidence * 100).toFixed(0)}%`),
         });
       }
     }

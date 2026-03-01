@@ -23,6 +23,7 @@ import { ImaginationEngine, type ImaginationContext } from "./lib/imaginationLan
 import { checkForRecallMoment } from "./lib/firstMemoryRecall.ts";
 import { onLLMDegraded } from "./lib/llmService.ts";
 import { applyFirstRunSettings } from "./lib/firstRunBridge.ts";
+import { locale } from "./lib/i18n";
 import { log } from "./lib/logger.ts";
 import {
   RECALL_MOMENT_DELAY_MS,
@@ -330,9 +331,7 @@ function App() {
 
   useEffect(() => {
     onLLMDegraded(() => {
-      showSpeechBubbleRef.current(
-        "OpenClaw 연결이 불안정해... 기억 기능이 제한될 수 있어.",
-      );
+      showSpeechBubbleRef.current(locale().llm_degraded_message);
       emotionCallbackRef.current?.("sad");
     });
   }, []);
@@ -362,7 +361,7 @@ function App() {
         // Track rule-based comments as M30 memories for context
         try {
           memoryManager.trackKnowledge(
-            `[규칙 코멘트] ${session.appName} (${Math.round(session.duration / 60)}분): "${result.text}"`,
+            locale().memory_rule_comment(session.appName, Math.round(session.duration / 60), result.text),
             "M30",
             { source: "observation" },
           );
@@ -408,24 +407,17 @@ function App() {
         // Build context with memory for richer reactive comments
         const buildReactivePrompt = async () => {
           const url = await getBrowserUrl(appName);
-          let info = `앱: "${appName}", 윈도우 제목: "${title}"`;
-          if (url) {
-            info += `, URL: ${url}`;
-          }
 
           // Include memory context for more personalized reactions
-          let memoryHint = "";
+          let memoryContext: string | null = null;
           try {
-            const memories = await memoryManager.getContextForChat();
-            if (memories) {
-              memoryHint = `\n[참고 기억]\n${memories}`;
-            }
+            memoryContext = await memoryManager.getContextForChat() || null;
           } catch {
             // Memory unavailable — proceed without it
           }
 
-          const prompt = `[앱 전환 알림] 사용자가 방금 앱을 전환했어. ${info}. 한마디 해줘. 한 문장, 15자 이내로 짧게.${memoryHint}`;
-          log.info("[App] Reactive: sending to OpenClaw:", info);
+          const prompt = locale().reactive_prompt(appName, title, url, memoryContext);
+          log.info("[App] Reactive: sending to OpenClaw:", appName, title);
           return sendChat(prompt);
         };
 
@@ -442,7 +434,7 @@ function App() {
             // Track reactive comments as M30 memories for context
             try {
               memoryManager.trackKnowledge(
-                `[앱 전환 반응] ${appName}: "${parsed.text}"`,
+                locale().memory_app_switch(appName, parsed.text),
                 "M30",
                 { source: "observation" },
               );
@@ -687,7 +679,7 @@ function App() {
       // Quiet mode: mute comment engine for 30 minutes
       const unlistenQuiet = await listen("tray-quiet-mode", () => {
         commentEngine.setMuted(true, QUIET_MODE_DURATION_MS);
-        showSpeechBubble("30분 동안 조용히 할게~");
+        showSpeechBubble(locale().quiet_mode_message);
       });
       if (cancelled) { unlistenQuiet(); return; }
       unlisteners.push(unlistenQuiet);
@@ -736,10 +728,10 @@ function App() {
         personality={motionPersonality}
         onModelLoaded={(filename) => {
           setCurrentModelName(filename);
-          showSpeechBubble(`새 모델 로딩 완료: ${filename}`);
+          showSpeechBubble(locale().model_loaded(filename));
         }}
         onModelError={(error) => {
-          showSpeechBubble(`모델 로딩 실패: ${error}`);
+          showSpeechBubble(locale().model_error(error));
           emotionCallbackRef.current?.("sad");
         }}
       />
@@ -816,6 +808,7 @@ function App() {
             onClick={() => setIsSettingsOpen(true)}
             aria-label="Open settings"
             title="Settings"
+            data-hit-target
           >
             &#x2699;
           </button>
@@ -910,7 +903,7 @@ function FtueChatWindow({
     >
       <div className="chat-header">
         <div style={{ display: "flex", alignItems: "center" }}>
-          <span className="chat-header-title">Chat</span>
+          <span className="chat-header-title">{locale().ui_chat_title}</span>
         </div>
         <button
           className="chat-close-btn"
@@ -935,7 +928,7 @@ function FtueChatWindow({
           ref={inputRef}
           className="chat-input"
           type="text"
-          placeholder="Type a message..."
+          placeholder={locale().ui_chat_placeholder}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}

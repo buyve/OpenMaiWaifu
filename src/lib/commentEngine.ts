@@ -1,5 +1,6 @@
 import type { AppSession } from "../hooks/useScreenWatch.ts";
 import { log } from "./logger.ts";
+import { locale } from "./i18n";
 
 // ---------- Types ----------
 
@@ -135,71 +136,50 @@ const REACTIVE_DAILY_LIMITS: Record<number, number> = {
 
 // ---------- Default rules ----------
 
-const RULES: CommentRule[] = [
-  {
-    id: "youtube_long",
-    condition: (s) =>
-      isVideoApp(s.appName, s.title) && s.duration > 1800,
-    messages: [
-      "쉬엄쉬엄 봐~",
-      "눈 좀 쉬어!",
-      "영상 길다...",
-      "한 30분 넘게 보고 있네!",
-    ],
-    emotion: "relaxed",
-    cooldownMinutes: 120,
-  },
-  {
-    id: "vscode_long",
-    condition: (s) =>
-      isCodeEditor(s.appName, s.title) && s.duration > 7200,
-    messages: [
-      "스트레칭 좀 해!",
-      "허리 펴!",
-      "쉬었다 해~",
-      "2시간 넘게 코딩 중...",
-    ],
-    emotion: "thinking",
-    cooldownMinutes: 120,
-  },
-  {
-    id: "late_night",
-    condition: (_s, _h, hour) => hour >= 2 && hour < 5,
-    messages: [
-      "자라...",
-      "새벽인데 아직 안 자?",
-      "내일도 있잖아",
-      "이 시간에 자야 해...",
-    ],
-    emotion: "sad",
-    cooldownMinutes: 60,
-  },
-  {
-    id: "twitter_again",
-    condition: (s, history) =>
-      isSocialMedia(s.appName, s.title) &&
-      countRecentSwitches(history, s.appName) > 3,
-    messages: [
-      "또 트위터야?",
-      "좀 전에도 봤잖아...",
-      "SNS 그만!",
-      "또 열었네...",
-    ],
-    emotion: "surprised",
-    cooldownMinutes: 90,
-  },
-  {
-    id: "long_session_general",
-    condition: (s) => s.duration > 5400, // 90 minutes of any single app
-    messages: [
-      "좀 쉬는 게 어때?",
-      "물이라도 마셔!",
-      "잠깐 스트레칭!",
-    ],
-    emotion: "neutral",
-    cooldownMinutes: 90,
-  },
-];
+function getRules(): CommentRule[] {
+  const l = locale();
+  return [
+    {
+      id: "youtube_long",
+      condition: (s) =>
+        isVideoApp(s.appName, s.title) && s.duration > 1800,
+      messages: l.comment_youtube_long,
+      emotion: "relaxed",
+      cooldownMinutes: 120,
+    },
+    {
+      id: "vscode_long",
+      condition: (s) =>
+        isCodeEditor(s.appName, s.title) && s.duration > 7200,
+      messages: l.comment_vscode_long,
+      emotion: "thinking",
+      cooldownMinutes: 120,
+    },
+    {
+      id: "late_night",
+      condition: (_s, _h, hour) => hour >= 2 && hour < 5,
+      messages: l.comment_late_night,
+      emotion: "sad",
+      cooldownMinutes: 60,
+    },
+    {
+      id: "twitter_again",
+      condition: (s, history) =>
+        isSocialMedia(s.appName, s.title) &&
+        countRecentSwitches(history, s.appName) > 3,
+      messages: l.comment_twitter_again,
+      emotion: "surprised",
+      cooldownMinutes: 90,
+    },
+    {
+      id: "long_session_general",
+      condition: (s) => s.duration > 5400, // 90 minutes of any single app
+      messages: l.comment_long_session,
+      emotion: "neutral",
+      cooldownMinutes: 90,
+    },
+  ];
+}
 
 // ---------- CommentEngine ----------
 
@@ -224,7 +204,7 @@ export class CommentEngine {
   private _cooldowns: Map<string, number>; // ruleId -> last-fire timestamp
 
   constructor(dailyLimit = 3) {
-    this._rules = [...RULES];
+    this._rules = getRules();
     this._dailyLimit = dailyLimit;
     this._reactiveDailyLimit = REACTIVE_DAILY_LIMITS[dailyLimit] ?? 30;
     this._reactiveDailyCount = 0;

@@ -6,6 +6,8 @@
  * When M0 memories are removed, islands can shake and collapse.
  */
 
+import { locale } from "./i18n";
+
 // ---------- Types ----------
 
 export type IslandStatus = "active" | "shaking" | "collapsed" | "rebuilding";
@@ -36,43 +38,46 @@ export interface IslandEvent {
 const STORAGE_KEY = "companion_personality_islands";
 const SHAKING_TO_COLLAPSE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-// ---------- Default Islands (seeded on first run for Claire) ----------
+// ---------- Default Islands (seeded on first run) ----------
 
-const DEFAULT_ISLANDS: PersonalityIsland[] = [
-  {
-    id: "island-bond",
-    name: "주인과의 유대",
-    emoji: "🏠",
-    description: "The bond with the owner. Foundation of trust and companionship.",
-    foundingMemories: [],
-    status: "active",
-    strength: 0.5,
-    createdAt: Date.now(),
-    shakingSince: null,
-  },
-  {
-    id: "island-tsundere",
-    name: "츤데레",
-    emoji: "😤",
-    description: "Tough exterior, warm interior. The core personality trait.",
-    foundingMemories: [],
-    status: "active",
-    strength: 0.5,
-    createdAt: Date.now(),
-    shakingSince: null,
-  },
-  {
-    id: "island-curiosity",
-    name: "기술적 호기심",
-    emoji: "💻",
-    description: "Interest in technology, coding, and how things work.",
-    foundingMemories: [],
-    status: "active",
-    strength: 0.3,
-    createdAt: Date.now(),
-    shakingSince: null,
-  },
-];
+function getDefaultIslands(): PersonalityIsland[] {
+  const l = locale();
+  return [
+    {
+      id: "island-bond",
+      name: l.island_bond_name,
+      emoji: "🏠",
+      description: "The bond with the owner. Foundation of trust and companionship.",
+      foundingMemories: [],
+      status: "active" as IslandStatus,
+      strength: 0.5,
+      createdAt: Date.now(),
+      shakingSince: null,
+    },
+    {
+      id: "island-tsundere",
+      name: l.island_tsundere_name,
+      emoji: "😤",
+      description: "Tough exterior, warm interior. The core personality trait.",
+      foundingMemories: [],
+      status: "active" as IslandStatus,
+      strength: 0.5,
+      createdAt: Date.now(),
+      shakingSince: null,
+    },
+    {
+      id: "island-curiosity",
+      name: l.island_curiosity_name,
+      emoji: "💻",
+      description: "Interest in technology, coding, and how things work.",
+      foundingMemories: [],
+      status: "active" as IslandStatus,
+      strength: 0.3,
+      createdAt: Date.now(),
+      shakingSince: null,
+    },
+  ];
+}
 
 // ---------- Island Manager ----------
 
@@ -125,7 +130,7 @@ export class IslandManager {
     return {
       type: "created",
       island,
-      message: `${emoji} 새로운 성격 섬 "${name}"이(가) 만들어졌어!`,
+      message: locale().island_created(emoji, name),
     };
   }
 
@@ -152,7 +157,7 @@ export class IslandManager {
     return {
       type: "strengthened",
       island,
-      message: `${island.emoji} "${island.name}" 섬이 더 강해졌어!`,
+      message: locale().island_strengthened(island.emoji, island.name),
     };
   }
 
@@ -177,7 +182,7 @@ export class IslandManager {
         events.push({
           type: "shaking",
           island,
-          message: `⚠️ "${island.name}" 섬이 흔들리고 있어! 7일 안에 코어 메모리를 복원하지 않으면 무너질 거야...`,
+          message: locale().island_shaking(island.name),
         });
       }
     }
@@ -205,7 +210,7 @@ export class IslandManager {
         events.push({
           type: "collapsed",
           island,
-          message: `💔 "${island.name}" 섬이 무너졌어... 코어 메모리가 없으면 섬은 유지될 수 없어.`,
+          message: locale().island_collapsed(island.name),
         });
       }
     }
@@ -231,7 +236,7 @@ export class IslandManager {
     return {
       type: "rebuilt",
       island,
-      message: `🌱 "${island.name}" 섬이 다시 세워지고 있어! 아직 약하지만, 기억이 쌓이면 강해질 거야.`,
+      message: locale().island_rebuilt(island.name),
     };
   }
 
@@ -261,7 +266,7 @@ export class IslandManager {
       }
     } catch { /* corrupted */ }
     // Seed defaults on first run
-    const defaults = DEFAULT_ISLANDS.map((d) => ({ ...d, createdAt: Date.now() }));
+    const defaults = getDefaultIslands().map((d) => ({ ...d, createdAt: Date.now() }));
     this.islands = defaults;
     this.save();
     return defaults;

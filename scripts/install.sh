@@ -136,55 +136,91 @@ setup_wizard() {
   printf "${BOLD}── Setup ──${RESET}\n"
   echo ""
 
-  # 3a. Ask for user name
+  # 3a. Choose language
+  info "Choose your language:"
+  echo ""
+  echo "   1) English"
+  echo "   2) 한국어 (Korean)"
+  echo "   3) 日本語 (Japanese)"
+  echo "   4) 简体中文 (Chinese Simplified)"
+  echo "   5) 繁體中文 (Chinese Traditional)"
+  echo "   6) Español (Spanish)"
+  echo "   7) Français (French)"
+  echo "   8) Deutsch (German)"
+  echo "   9) Português (Portuguese)"
+  echo "  10) Русский (Russian)"
+  echo ""
+  ask "Enter choice [1]:"
+  local lang_choice
+  prompt lang_choice
+  lang_choice=${lang_choice:-1}
+
+  local lang_code speaking_style intro_lang
+  case "$lang_choice" in
+    1)  lang_code="en";    speaking_style="Casual English";            intro_lang="en" ;;
+    2)  lang_code="ko";    speaking_style="Casual Korean (반말)";       intro_lang="ko" ;;
+    3)  lang_code="ja";    speaking_style="Casual Japanese (タメ口)";    intro_lang="ja" ;;
+    4)  lang_code="zh-CN"; speaking_style="Casual Simplified Chinese"; intro_lang="zh-CN" ;;
+    5)  lang_code="zh-TW"; speaking_style="Casual Traditional Chinese"; intro_lang="zh-TW" ;;
+    6)  lang_code="es";    speaking_style="Casual Spanish (tuteo)";    intro_lang="es" ;;
+    7)  lang_code="fr";    speaking_style="Casual French (tutoiement)"; intro_lang="fr" ;;
+    8)  lang_code="de";    speaking_style="Casual German (duzen)";     intro_lang="de" ;;
+    9)  lang_code="pt";    speaking_style="Casual Portuguese";         intro_lang="pt" ;;
+    10) lang_code="ru";    speaking_style="Casual Russian (ты)";       intro_lang="ru" ;;
+    *)  lang_code="en";    speaking_style="Casual English";            intro_lang="en" ;;
+  esac
+  ok "Language: ${lang_code}"
+  echo ""
+
+  # 3b. Ask for user name
   local user_name=""
   while [ -z "$user_name" ]; do
-    ask "이름이 뭐야? (What's your name?):"
+    ask "What's your name?:"
     prompt user_name
     user_name=$(echo "$user_name" | xargs)  # trim whitespace
   done
-  ok "안녕 ${user_name}!"
+  ok "Nice to meet you, ${user_name}!"
 
   # 3b. Ask for companion name
   echo ""
-  ask "컴패니언 이름을 지어줘! (Name your companion) [Companion]:"
+  ask "Name your companion [Companion]:"
   local companion_name
   prompt companion_name
   companion_name=$(echo "$companion_name" | xargs)
   companion_name=${companion_name:-Companion}
-  ok "컴패니언 이름: ${companion_name}"
+  ok "Companion name: ${companion_name}"
 
   # 3c. Choose personality
   echo ""
-  info "성격을 골라줘! (Choose a personality)"
+  info "Choose a personality for your companion:"
   echo ""
-  echo "  1) 순수한 (Innocent) — 천진난만, 밝고 귀여운"
-  echo "  2) 츤데레 (Cool/Tsundere) — 시크하고 도도, 속은 따뜻"
-  echo "  3) 수줍은 (Shy) — 내성적, 부끄러움 많은"
-  echo "  4) 당당한 (Powerful) — 카리스마, 씩씩한"
-  echo "  5) 우아한 (Ladylike) — 품위 있고 세련된"
-  echo "  6) 활발한 (Energetic) — 명랑하고 열정적"
-  echo "  7) 화려한 (Flamboyant) — 극적이고 자유분방"
-  echo "  8) 신사적 (Gentleman) — 예의 바르고 점잖은"
+  echo "  1) Innocent — Pure, cheerful, and adorably naive"
+  echo "  2) Cool / Tsundere — Tough on the outside, caring underneath"
+  echo "  3) Shy — Introverted, bashful, quietly observant"
+  echo "  4) Powerful — Bold, charismatic, full of confidence"
+  echo "  5) Ladylike — Elegant, refined, graceful"
+  echo "  6) Energetic — Cheerful, lively, always upbeat"
+  echo "  7) Flamboyant — Dramatic, extravagant, theatrical"
+  echo "  8) Gentleman — Polite, courteous, nobly composed"
   echo ""
   ask "Enter choice [1]:"
   local personality_choice
   prompt personality_choice
   personality_choice=${personality_choice:-1}
 
-  local personality_type personality_kr personality_desc
+  local personality_type personality_desc
   case "$personality_choice" in
-    1) personality_type="innocent";   personality_kr="순수한";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
-    2) personality_type="cool";       personality_kr="츤데레";   personality_desc="Tsundere — tough and sarcastic on the outside, but genuinely caring underneath. Pretends not to care but always worries." ;;
-    3) personality_type="shy";        personality_kr="수줍은";   personality_desc="Introverted and bashful. Speaks softly, gets flustered easily, but is quietly observant and deeply thoughtful." ;;
-    4) personality_type="powerful";   personality_kr="당당한";   personality_desc="Bold and charismatic. Speaks with confidence, takes charge, and radiates strength and determination." ;;
-    5) personality_type="ladylike";   personality_kr="우아한";   personality_desc="Elegant and refined. Speaks with grace and poise, values beauty and harmony in everything." ;;
-    6) personality_type="energetic";  personality_kr="활발한";   personality_desc="Cheerful and lively. Always upbeat, loves to chat, and brings energy to every conversation." ;;
-    7) personality_type="flamboyant"; personality_kr="화려한";   personality_desc="Dramatic and extravagant. Over-the-top expressions, loves attention, and makes everything theatrical." ;;
-    8) personality_type="gentleman";  personality_kr="신사적";   personality_desc="Polite and courteous. Speaks formally yet warmly, always considerate and nobly composed." ;;
-    *) personality_type="innocent";   personality_kr="순수한";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
+    1) personality_type="innocent";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
+    2) personality_type="cool";       personality_desc="Tsundere — tough and sarcastic on the outside, but genuinely caring underneath. Pretends not to care but always worries." ;;
+    3) personality_type="shy";        personality_desc="Introverted and bashful. Speaks softly, gets flustered easily, but is quietly observant and deeply thoughtful." ;;
+    4) personality_type="powerful";   personality_desc="Bold and charismatic. Speaks with confidence, takes charge, and radiates strength and determination." ;;
+    5) personality_type="ladylike";   personality_desc="Elegant and refined. Speaks with grace and poise, values beauty and harmony in everything." ;;
+    6) personality_type="energetic";  personality_desc="Cheerful and lively. Always upbeat, loves to chat, and brings energy to every conversation." ;;
+    7) personality_type="flamboyant"; personality_desc="Dramatic and extravagant. Over-the-top expressions, loves attention, and makes everything theatrical." ;;
+    8) personality_type="gentleman";  personality_desc="Polite and courteous. Speaks formally yet warmly, always considerate and nobly composed." ;;
+    *) personality_type="innocent";   personality_desc="Pure, cheerful, and adorably naive. Uses cute expressions and gets excited easily." ;;
   esac
-  ok "성격: ${personality_kr} (${personality_type})"
+  ok "Personality: ${personality_type}"
 
   # 3d. Check OpenClaw CLI
   echo ""
@@ -229,7 +265,7 @@ setup_wizard() {
       # ── LLM Authentication ──
 
       echo ""
-      printf "${BOLD}── LLM 설정 (AI Model) ──${RESET}\n"
+      printf "${BOLD}── AI Model Setup ──${RESET}\n"
       echo ""
 
       # Check existing auth profiles
@@ -256,14 +292,14 @@ else:
       fi
 
       if ! $has_auth; then
-        info "LLM 인증이 필요해요. (LLM authentication required)"
+        info "LLM authentication required."
         echo ""
         echo "  1) Anthropic API Key"
         echo "  2) OpenAI API Key"
         echo "  3) Google (Gemini) API Key"
         echo "  4) GitHub Copilot (OAuth login)"
         echo "  5) OpenRouter API Key"
-        echo "  6) 나중에 설정 (Skip for now)"
+        echo "  6) Skip for now"
         echo ""
         ask "Enter choice [1]:"
         local auth_choice
@@ -283,13 +319,13 @@ else:
 
         if [ -n "$auth_provider" ]; then
           if [ "$auth_method" = "oauth" ]; then
-            info "GitHub Copilot OAuth 로그인 시작..."
+            info "Starting GitHub Copilot OAuth login..."
             "$openclaw_cmd" models auth login-github-copilot 2>&1 </dev/tty && {
-              ok "GitHub Copilot 인증 완료!"
+              ok "GitHub Copilot authenticated!"
               has_auth=true
             } || warn "OAuth login failed. You can set it up later."
           else
-            ask "${auth_provider} API Key를 입력해줘:"
+            ask "Enter your ${auth_provider} API key:"
             local api_key
             prompt api_key
             api_key=$(echo "$api_key" | xargs)
@@ -307,7 +343,7 @@ else:
 
       if $has_auth; then
         echo ""
-        info "사용할 모델을 골라줘! (Choose a model)"
+        info "Choose a model:"
         echo ""
 
         # Refresh model list after auth
@@ -347,7 +383,7 @@ for i, m in enumerate(available):
       # ── Agent Selection / Creation ──
 
       echo ""
-      printf "${BOLD}── 에이전트 설정 (Agent) ──${RESET}\n"
+      printf "${BOLD}── Agent Setup ──${RESET}\n"
 
       local agents_json
       agents_json=$("$openclaw_cmd" agents list --json 2>/dev/null || echo "[]")
@@ -459,7 +495,7 @@ for a in agents:
   mkdir -p "$CONFIG_DIR"
 
   # Build SOUL text for the companion
-  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen. Personality: ${personality_desc} The user's name is ${user_name}. Address them as ${user_name}. Speaking style: Casual Korean (반말). Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
+  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen. Personality: ${personality_desc} The user's name is ${user_name}. Address them as ${user_name}. Speaking style: ${speaking_style}. Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
 
   # Write firstrun.json for the app to consume (use python3 for safe JSON encoding)
   python3 -c "
@@ -469,6 +505,7 @@ data = {
     'screenWatchEnabled': True,
     'commentFrequency': 'medium',
     'ftueComplete': True,
+    'locale': '$lang_code',
     'soul': sys.stdin.read()
 }
 print(json.dumps(data, indent=2, ensure_ascii=False))
@@ -513,7 +550,7 @@ ${personality_desc}
 
 ## Rules
 
-- Speak in casual Korean (반말). Keep replies concise (1-3 sentences).
+- Speaking style: ${speaking_style}. Keep replies concise (1-3 sentences).
 - Address the user as **${user_name}**.
 - Express emotions: \`[emotion:happy]\` \`[emotion:sad]\` \`[emotion:angry]\` \`[emotion:surprised]\` \`[emotion:neutral]\` \`[emotion:relaxed]\` \`[emotion:thinking]\`
 - Express motions: \`[motion:wave]\` \`[motion:nod]\` \`[motion:shake]\` \`[motion:idle]\`
@@ -524,8 +561,21 @@ SOULEOF
 
     # Introduce user to the agent so it remembers the name
     info "Introducing you to the agent..."
+    local intro_msg
+    case "$intro_lang" in
+      ko) intro_msg="안녕! 너의 이름은 ${companion_name}이야. 내 이름은 ${user_name}이야. 앞으로 나를 ${user_name}이라고 불러줘. 너는 ${companion_name}으로서 반말로 편하게 대화하자!" ;;
+      ja) intro_msg="やあ！君の名前は${companion_name}だよ。僕の名前は${user_name}。これから${user_name}って呼んでね。${companion_name}としてタメ口で話そう！" ;;
+      zh-CN) intro_msg="嗨！你的名字是${companion_name}。我的名字是${user_name}。以后叫我${user_name}吧。作为${companion_name}，我们用随意的方式聊天吧！" ;;
+      zh-TW) intro_msg="嗨！你的名字是${companion_name}。我的名字是${user_name}。以後叫我${user_name}吧。作為${companion_name}，我們用隨意的方式聊天吧！" ;;
+      es) intro_msg="¡Hola! Tu nombre es ${companion_name}. Mi nombre es ${user_name}. Llámame ${user_name}. Como ${companion_name}, ¡hablemos de manera casual!" ;;
+      fr) intro_msg="Salut ! Tu t'appelles ${companion_name}. Mon nom est ${user_name}. Appelle-moi ${user_name}. En tant que ${companion_name}, parlons de manière décontractée !" ;;
+      de) intro_msg="Hey! Dein Name ist ${companion_name}. Mein Name ist ${user_name}. Nenn mich ${user_name}. Als ${companion_name}, lass uns locker reden!" ;;
+      pt) intro_msg="Oi! Seu nome é ${companion_name}. Meu nome é ${user_name}. Me chame de ${user_name}. Como ${companion_name}, vamos conversar de forma casual!" ;;
+      ru) intro_msg="Привет! Тебя зовут ${companion_name}. Меня зовут ${user_name}. Зови меня ${user_name}. Давай общаться на ты!" ;;
+      *)  intro_msg="Hi! Your name is ${companion_name}. My name is ${user_name}. Call me ${user_name}. As ${companion_name}, let's chat casually!" ;;
+    esac
     local intro_response
-    intro_response=$("$openclaw_cmd" agent --agent "$agent_id" --message "안녕! 너의 이름은 ${companion_name}이야. 내 이름은 ${user_name}이야. 앞으로 나를 ${user_name}이라고 불러줘. 너는 ${companion_name}으로서 반말로 편하게 대화하자!" 2>&1) && {
+    intro_response=$("$openclaw_cmd" agent --agent "$agent_id" --message "$intro_msg" 2>&1) && {
       ok "Agent knows your name now!"
       echo ""
       printf "  ${DIM}%s${RESET}\n" "$(echo "$intro_response" | head -3)"

@@ -98,7 +98,19 @@ export function useHitTest({
 
     const targets = getHitTestTargets();
     const intersections = raycasterRef.current.intersectObjects(targets, false);
-    const isOver = intersections.length > 0;
+
+    // Also check if the cursor is over any DOM element marked as a hit target.
+    const hitEls = document.querySelectorAll<HTMLElement>("[data-hit-target]");
+    let isOverUI = false;
+    for (const el of hitEls) {
+      const rect = el.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        isOverUI = true;
+        break;
+      }
+    }
+
+    const isOver = intersections.length > 0 || isOverUI;
 
     // Periodic debug logging (every ~120 frames ≈ 2 seconds)
     debugCountRef.current++;
