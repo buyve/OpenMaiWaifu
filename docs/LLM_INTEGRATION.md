@@ -20,7 +20,7 @@ These users already have:
 - ✅ LLM API key configured
 
 What the app needs to do:
-1. Settings에서 Agent ID 입력 (or auto-create)
+1. Enter Agent ID in Settings (or auto-create)
 2. CLI path auto-detected via `which openclaw`
 3. Gateway URL defaults to `localhost:18789`
 4. Done — install app → run → chat immediately
