@@ -1,4 +1,4 @@
-//! Binary entry point for the AI Desktop Companion Tauri app.
+//! Binary entry point for the OpenMaiWaifu Tauri app.
 //!
 //! In release builds, `windows_subsystem = "windows"` hides the console
 //! window on Windows. All application logic is in [`ai_desktop_companion_lib::run`].

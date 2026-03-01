@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "AI Desktop Companion",
+  "productName": "OpenMaiWaifu",
   "version": "0.1.0",
   "identifier": "com.openclaw.desktop-companion",
   "build": {

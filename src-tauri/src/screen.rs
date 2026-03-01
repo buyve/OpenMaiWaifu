@@ -321,7 +321,7 @@ fn get_window_list_xwin() -> Vec<WindowInfo> {
             .into_iter()
             .filter(|w| {
                 !w.title.is_empty()
-                    && w.info.name != "AI Desktop Companion"
+                    && w.info.name != "OpenMaiWaifu"
                     && w.position.width > 0
                     && w.position.height > 0
             })

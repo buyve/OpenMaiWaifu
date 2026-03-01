@@ -1,4 +1,4 @@
-//! AI Desktop Companion — Tauri backend entry point.
+//! OpenMaiWaifu — Tauri backend entry point.
 //!
 //! This crate drives the transparent, always-on-top desktop pet window.
 //! It initialises a full-screen transparent Tauri webview, sets up
