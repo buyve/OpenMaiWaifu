@@ -32,7 +32,7 @@ If you want a desktop character that actually **knows you** and grows with you, 
 **Preferred setup:** run the install script in your terminal. It guides you through language, name, personality, AI model, and OpenClaw agent setup. Works on macOS (Apple Silicon + Intel). Windows via `.msi` download.
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/buyve/OpenMaiWaifu/main/scripts/install.sh" | bash
+curl -fsSL "https://buyve.github.io/OpenMaiWaifu/install.sh" | bash
 ```
 
 ---
@@ -55,7 +55,7 @@ curl -fsSL "https://raw.githubusercontent.com/buyve/OpenMaiWaifu/main/scripts/in
 ### Install (macOS)
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/buyve/OpenMaiWaifu/main/scripts/install.sh" | bash
+curl -fsSL "https://buyve.github.io/OpenMaiWaifu/install.sh" | bash
 ```
 
 The installer will:
