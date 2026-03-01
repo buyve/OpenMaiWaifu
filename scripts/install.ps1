@@ -11,6 +11,22 @@
 #    4. Write firstrun.json so the app skips FTUE
 # ──────────────────────────────────────────────────────────
 
+# When piped via irm | iex, stdin is the script itself.
+# Save this script to a temp file and re-run it directly so Read-Host works.
+if (-not $env:OPENMAIWAIFU_RELAUNCH) {
+    $tmpScript = Join-Path $env:TEMP "openmaiwaifu-install.ps1"
+    # If we're being piped, $MyInvocation.MyCommand.Path is empty
+    if (-not $MyInvocation.MyCommand.Path) {
+        $scriptContent = $MyInvocation.MyCommand.ScriptBlock.ToString()
+        $scriptContent | Out-File -FilePath $tmpScript -Encoding utf8 -Force
+        $env:OPENMAIWAIFU_RELAUNCH = "1"
+        & powershell.exe -ExecutionPolicy Bypass -File $tmpScript
+        Remove-Item $tmpScript -Force -ErrorAction SilentlyContinue
+        $env:OPENMAIWAIFU_RELAUNCH = $null
+        exit $LASTEXITCODE
+    }
+}
+
 $ErrorActionPreference = "Stop"
 
 $REPO = "buyve/OpenMaiWaifu"
@@ -479,20 +495,6 @@ $personalityDesc
 
         # Introduce user to the agent
         Info "Introducing you to the agent..."
-        $introMsg = switch ($introLang) {
-            "ko"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "ja"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "zh-CN" { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "zh-TW" { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "es"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "fr"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "de"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "pt"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            "ru"    { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-            default { "Hi! Your name is $companionName. My name is $userName. Call me $userName. Let's chat casually!" }
-        }
-
-        # Use localized intro messages
         $introMsg = switch ($introLang) {
             "ko"    { "안녕! 너의 이름은 ${companionName}이야. 내 이름은 ${userName}이야. 앞으로 나를 ${userName}이라고 불러줘. 너는 ${companionName}으로서 반말로 편하게 대화하자!" }
             "ja"    { "やあ！君の名前は${companionName}だよ。僕の名前は${userName}。これから${userName}って呼んでね。${companionName}としてタメ口で話そう！" }
