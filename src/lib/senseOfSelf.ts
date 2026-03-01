@@ -60,7 +60,7 @@ const STORAGE_KEY = "companion_sense_of_self";
 
 /**
  * Maximum percentage of beliefs that can change in a single session.
- * Prevents the "Anxiety takeover" (시온 사건).
+ * Prevents the "Anxiety takeover" from Inside Out 2.
  */
 const MAX_CHANGE_RATIO = 0.3;
 

@@ -839,7 +839,7 @@ export class MemoryManager {
   // ---------- Pin / Conversation Signal API ----------
 
   /**
-   * Pin a memory ("기억해") — immediately promotes to next tier with distillation.
+   * Pin a memory ("remember this") — immediately promotes to next tier with distillation.
    * Called by conversation signal detection.
    */
   async pinMemory(id: string): Promise<{ from: string; to: string } | null> {
@@ -888,7 +888,7 @@ export class MemoryManager {
 
   // ---------- Forgetting Queue API ----------
 
-  /** Get all memories in the forgetting queue (망각의 절벽). */
+  /** Get all memories in the forgetting queue (forgetting cliff). */
   getForgettingQueue(): ForgettingEntry[] {
     return loadForgettingQueue();
   }
