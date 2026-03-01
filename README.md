@@ -14,8 +14,26 @@
 </p>
 
 <p align="center">
-  A VRM character that lives on your desktop — reacts to what you do, remembers your conversations, and develops its own personality over time. Powered by <a href="https://github.com/openclaw/openclaw">OpenClaw</a>.
+  <a href="https://github.com/buyve/OpenMaiWaifu/releases">Releases</a> ·
+  <a href="docs/MEMORY_ARCHITECTURE.md">Memory Docs</a> ·
+  <a href="docs/LLM_INTEGRATION.md">LLM Integration</a> ·
+  <a href="#quick-start">Getting Started</a> ·
+  <a href="#development">Development</a>
 </p>
+
+---
+
+OpenMaiWaifu is an open-source AI desktop companion that lives on your screen as a VRM character. It watches what you're doing, remembers your conversations, and develops its own personality over time — inspired by Pixar's *Inside Out*. Memories have emotions, get promoted through four tiers (short-term → core), and shape the character's identity through Personality Islands and "I am ___" beliefs.
+
+Unlike static chatbots, this companion is **always present**. It sits on your taskbar with real physics, reacts to your active app ("Still on YouTube?", "2 hours of coding — drink some water!"), and generates autonomous thoughts by combining memories with context. Conversations go through [OpenClaw](https://github.com/openclaw/openclaw) to your chosen LLM (Anthropic, OpenAI, Gemini, Copilot) — everything runs locally, nothing leaves your machine unless you chat.
+
+If you want a desktop character that actually **knows you** and grows with you, this is it.
+
+**Preferred setup:** run the install script in your terminal. It guides you through language, name, personality, AI model, and OpenClaw agent setup. Works on macOS (Apple Silicon + Intel). Windows via `.msi` download.
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/buyve/OpenMaiWaifu/main/scripts/install.sh" | bash
+```
 
 ---
 
