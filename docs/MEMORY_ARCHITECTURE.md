@@ -328,14 +328,8 @@ interface ForgettingEntry {
 On memory expiration:
   1. Not deleted immediately
   2. Moved to forgetting queue (held for 7 days)
-  3. User can browse the forgetting queue
-  4. "Save this one" → restored to original tier (TTL reset)
-  5. After 7 days → permanently deleted (Bing Bong's fate)
-
-UI:
-  - "Forgetting Cliff" tab in Memory Transparency panel
-  - Shows list of memories about to disappear
-  - One-touch restore button
+  3. Restoreable via API (restoreFromForgettingQueue)
+  4. After 7 days → permanently deleted (Bing Bong's fate)
 ```
 
 ---
