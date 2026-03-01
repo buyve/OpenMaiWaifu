@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────
-#  AI Desktop Companion — Install & Setup Script (Windows)
+#  OpenMaiWaifu — Install & Setup Script (Windows)
 #
 #  Usage:
 #    irm https://buyve.github.io/OpenMaiWaifu/install.ps1 | iex
@@ -30,7 +30,7 @@ if (-not $env:OPENMAIWAIFU_RELAUNCH) {
 $ErrorActionPreference = "Stop"
 
 $REPO = "buyve/OpenMaiWaifu"
-$APP_NAME = "AI Desktop Companion"
+$APP_NAME = "OpenMaiWaifu"
 $DATA_DIR = Join-Path $env:APPDATA "ai-desktop-companion"
 $CONFIG_DIR = Join-Path $env:APPDATA "ai-desktop-companion"
 
@@ -45,7 +45,7 @@ function Ask($msg)   { Write-Host "  ? " -ForegroundColor Cyan -NoNewline; Write
 function Banner {
     Write-Host ""
     Write-Host "    +=======================================+" -ForegroundColor Cyan
-    Write-Host "    |   AI Desktop Companion  - Installer   |" -ForegroundColor Cyan
+    Write-Host "    |   OpenMaiWaifu  - Installer   |" -ForegroundColor Cyan
     Write-Host "    +=======================================+" -ForegroundColor Cyan
     Write-Host ""
 }

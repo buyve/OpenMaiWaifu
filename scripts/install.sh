@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────
-#  AI Desktop Companion — Install & Setup Script
+#  OpenMaiWaifu — Install & Setup Script
 #
 #  Usage:
 #    curl -fsSL https://buyve.github.io/OpenMaiWaifu/install.sh | bash
@@ -14,7 +14,7 @@
 set -eo pipefail
 
 REPO="buyve/OpenMaiWaifu"
-APP_NAME="AI Desktop Companion"
+APP_NAME="OpenMaiWaifu"
 DATA_DIR="${HOME}/Library/Application Support/ai-desktop-companion"
 CONFIG_DIR="${HOME}/Library/Application Support/ai-desktop-companion"
 
@@ -42,7 +42,7 @@ banner() {
   printf "${BOLD}${CYAN}"
   cat << 'EOF'
     ╔═══════════════════════════════════════╗
-    ║   AI Desktop Companion  — Installer   ║
+    ║   OpenMaiWaifu  — Installer   ║
     ╚═══════════════════════════════════════╝
 EOF
   printf "${RESET}"

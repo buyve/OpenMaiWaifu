@@ -1,5 +1,5 @@
 /**
- * Centralized constants for the AI Desktop Companion.
+ * Centralized constants for OpenMaiWaifu.
  *
  * Constants that are only used in a single file and are already well-named
  * remain in their source files. This module collects values that are:

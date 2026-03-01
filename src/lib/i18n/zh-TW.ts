@@ -28,7 +28,7 @@ const zhTW: LocaleStrings = {
   ui_resource_usage: "資源使用",
   ui_memory_format: (mb) => `記憶體: ${mb} MB`,
   ui_app_version: "版本",
-  ui_version_footer: (v) => `AI Desktop Companion v${v}`,
+  ui_version_footer: (v) => `OpenMaiWaifu v${v}`,
   ui_language: "語言",
 };
 

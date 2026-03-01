@@ -29,7 +29,7 @@ const ja: LocaleStrings = {
   ui_resource_usage: "リソース使用量",
   ui_memory_format: (mb) => `メモリ: ${mb} MB`,
   ui_app_version: "バージョン",
-  ui_version_footer: (v) => `AI Desktop Companion v${v}`,
+  ui_version_footer: (v) => `OpenMaiWaifu v${v}`,
   ui_language: "言語",
 };
 

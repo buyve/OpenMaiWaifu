@@ -187,7 +187,7 @@ Always stay in character. Never say you are an AI. Never break the fourth wall.`
   ui_resource_usage: "Resource Usage",
   ui_memory_format: (mb) => `Memory: ${mb} MB`,
   ui_app_version: "App Version",
-  ui_version_footer: (v) => `AI Desktop Companion v${v}`,
+  ui_version_footer: (v) => `OpenMaiWaifu v${v}`,
   ui_language: "Language",
 };
 

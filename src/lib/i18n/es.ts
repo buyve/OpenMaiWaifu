@@ -28,7 +28,7 @@ const es: LocaleStrings = {
   ui_resource_usage: "Uso de Recursos",
   ui_memory_format: (mb) => `Memoria: ${mb} MB`,
   ui_app_version: "Versión",
-  ui_version_footer: (v) => `AI Desktop Companion v${v}`,
+  ui_version_footer: (v) => `OpenMaiWaifu v${v}`,
   ui_language: "Idioma",
 };
 

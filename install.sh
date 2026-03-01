@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AI Desktop Companion — One-liner Install Script
+# OpenMaiWaifu — One-liner Install Script
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/buyve/openmaiwaifu/main/install.sh | bash
@@ -15,7 +15,7 @@ set -euo pipefail
 # ---------- Constants ----------
 
 REPO="buyve/openmaiwaifu"
-APP_NAME="AI Desktop Companion"
+APP_NAME="OpenMaiWaifu"
 INSTALL_DIR="/Applications"
 BINARY_PREFIX="AI-Desktop-Companion"
 
@@ -208,7 +208,7 @@ prompt_yesno() {
 
 run_setup_wizard() {
   step "Setup Wizard"
-  printf "${DIM}Configure your AI Desktop Companion. Press Enter to accept defaults.${RESET}\n\n"
+  printf "${DIM}Configure your OpenMaiWaifu. Press Enter to accept defaults.${RESET}\n\n"
 
   # --- Name ---
   prompt_name
@@ -321,7 +321,7 @@ launch_app() {
 
 main() {
   printf "\n${BOLD}${CYAN}╭────────────────────────────────────╮${RESET}\n"
-  printf "${BOLD}${CYAN}│   AI Desktop Companion Installer   │${RESET}\n"
+  printf "${BOLD}${CYAN}│   OpenMaiWaifu Installer   │${RESET}\n"
   printf "${BOLD}${CYAN}╰────────────────────────────────────╯${RESET}\n\n"
 
   check_requirements
