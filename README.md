@@ -58,6 +58,9 @@ irm https://buyve.github.io/OpenMaiWaifu/install.ps1 | iex
 
 ---
 
+> [!IMPORTANT]
+> **OpenMaiWaifu requires [OpenClaw](https://github.com/openclaw/openclaw) to work.** OpenClaw is a local AI gateway that routes conversations to your chosen LLM (Anthropic, OpenAI, Gemini, Copilot). Without it, the character cannot chat, generate comments, or use any AI features. The install script handles this for you, but if you're installing manually, make sure OpenClaw is set up first.
+
 ## Quick Start
 
 ### Install (macOS)
@@ -171,7 +174,7 @@ Inspired by Pixar's *Inside Out* — memories have emotions, can be promoted or 
 - Node.js 20+
 - Rust (stable)
 - [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/)
-- [OpenClaw CLI](https://github.com/openclaw/openclaw) (for AI features)
+- **[OpenClaw CLI](https://github.com/openclaw/openclaw)** — **Required.** Local AI gateway for all chat and AI features
 
 ### Setup
 
