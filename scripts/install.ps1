@@ -87,7 +87,7 @@ function Download-And-Install {
     }
     Ok "Latest version: $tag"
 
-    $filename = "AI-Desktop-Companion_${tag}_windows-x86_64.msi"
+    $filename = "OpenMaiWaifu_${tag}_windows-x86_64.msi"
     $url = "https://github.com/$REPO/releases/download/$tag/$filename"
 
     $tmpDir = Join-Path $env:TEMP "openmaiwaifu-install"

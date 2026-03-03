@@ -110,9 +110,9 @@ Grab the latest build from [Releases](https://github.com/buyve/OpenMaiWaifu/rele
 
 | Platform | File |
 |----------|------|
-| macOS (Apple Silicon) | `AI-Desktop-Companion_vX.X.X_darwin-aarch64.tar.gz` |
-| macOS (Intel) | `AI-Desktop-Companion_vX.X.X_darwin-x86_64.tar.gz` |
-| Windows | `AI-Desktop-Companion_vX.X.X_windows-x86_64.msi` |
+| macOS (Apple Silicon) | `OpenMaiWaifu_vX.X.X_darwin-aarch64.tar.gz` |
+| macOS (Intel) | `OpenMaiWaifu_vX.X.X_darwin-x86_64.tar.gz` |
+| Windows | `OpenMaiWaifu_vX.X.X_windows-x86_64.msi` |
 
 ---
 

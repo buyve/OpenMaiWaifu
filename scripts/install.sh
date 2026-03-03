@@ -114,7 +114,7 @@ download_and_install() {
   fi
   ok "Latest version: $tag"
 
-  local filename="AI-Desktop-Companion_${tag}_${platform}.tar.gz"
+  local filename="OpenMaiWaifu_${tag}_${platform}.tar.gz"
   local url="https://github.com/$REPO/releases/download/${tag}/${filename}"
 
   local tmpdir

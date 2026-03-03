@@ -61,7 +61,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           APP_PATH="$(find src-tauri/target/${{ matrix.target }}/release/bundle -name '*.app' -type d | head -1)"
-          ARCHIVE_NAME="AI-Desktop-Companion_${GITHUB_REF_NAME}_${{ matrix.arch_tag }}.tar.gz"
+          ARCHIVE_NAME="OpenMaiWaifu_${GITHUB_REF_NAME}_${{ matrix.arch_tag }}.tar.gz"
           tar -czf "${ARCHIVE_NAME}" -C "$(dirname "$APP_PATH")" "$(basename "$APP_PATH")"
           echo "ARTIFACT_PATH=${ARCHIVE_NAME}" >> $GITHUB_ENV
 
@@ -71,7 +71,7 @@ jobs:
         shell: pwsh
         run: |
           $msi = Get-ChildItem -Path "src-tauri\target\${{ matrix.target }}\release\bundle" -Filter "*.msi" -Recurse | Select-Object -First 1
-          $newName = "AI-Desktop-Companion_${{ github.ref_name }}_${{ matrix.arch_tag }}.msi"
+          $newName = "OpenMaiWaifu_${{ github.ref_name }}_${{ matrix.arch_tag }}.msi"
           Copy-Item $msi.FullName -Destination $newName
           "ARTIFACT_PATH=$newName" | Out-File -FilePath $env:GITHUB_ENV -Append
 

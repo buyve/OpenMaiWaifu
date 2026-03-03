@@ -17,7 +17,7 @@ set -euo pipefail
 REPO="buyve/openmaiwaifu"
 APP_NAME="OpenMaiWaifu"
 INSTALL_DIR="/Applications"
-BINARY_PREFIX="AI-Desktop-Companion"
+BINARY_PREFIX="OpenMaiWaifu"
 
 # Colors (disabled when piped / non-TTY)
 if [ -t 1 ]; then
