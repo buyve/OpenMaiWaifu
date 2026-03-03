@@ -416,7 +416,9 @@ function App() {
             // Memory unavailable — proceed without it
           }
 
-          const prompt = locale().reactive_prompt(appName, title, url, memoryContext);
+          const userName = localStorage.getItem("companion_user_name");
+          const nameHint = userName ? `\n[USER NAME]\nThe user's name is ${userName}.` : "";
+          const prompt = locale().reactive_prompt(appName, title, url, memoryContext) + nameHint;
           log.info("[App] Reactive: sending to OpenClaw:", appName, title);
           return sendChat(prompt);
         };

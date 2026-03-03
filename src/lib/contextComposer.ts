@@ -21,6 +21,11 @@ export async function composeContext(
     parts.push(`[SYSTEM]\n${soul}`);
   }
 
+  const userName = localStorage.getItem("companion_user_name");
+  if (userName) {
+    parts.push(`[USER NAME]\nThe user's name is ${userName}. Always address them as ${userName}.`);
+  }
+
   const memories = await memoryManager.getContextForChat();
   if (memories) {
     parts.push(`[MEMORY CONTEXT]\n${memories}`);
