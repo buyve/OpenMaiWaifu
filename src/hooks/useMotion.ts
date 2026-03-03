@@ -25,6 +25,8 @@ export interface UseMotionReturn {
   stopAnimation: () => void;
   /** Must be called every frame with delta time (seconds). */
   update: (delta: number) => void;
+  /** Preload a custom VRMA animation from a File object. */
+  preloadCustomAnimation: (filename: string, file: File) => Promise<void>;
 }
 
 // ---------- Hook ----------
@@ -227,11 +229,27 @@ export function useMotion(vrm: VRM | null, personality: MotionPersonality = "inn
     });
   }, []);
 
+  const preloadCustomAnimation = useCallback(
+    async (filename: string, file: File) => {
+      const manager = managerRef.current;
+      if (!manager) return;
+      const url = URL.createObjectURL(file);
+      try {
+        await manager.loadCustomAnimation(filename, url);
+        log.info(`[useMotion] Preloaded custom animation on demand: ${filename}`);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    },
+    [],
+  );
+
   return {
     currentAnimation,
     isPlaying,
     playAnimation,
     stopAnimation,
     update,
+    preloadCustomAnimation,
   };
 }

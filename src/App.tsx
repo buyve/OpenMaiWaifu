@@ -116,6 +116,7 @@ function App() {
   const emotionCallbackRef = useRef<((emotion: string) => void) | null>(null);
   const motionCallbackRef = useRef<((motion: string) => void) | null>(null);
   const loadVRMRef = useRef<((source: string | File) => void) | null>(null);
+  const preloadCustomAnimRef = useRef<((filename: string, file: File) => Promise<void>) | null>(null);
 
   // Character head screen position (updated every frame by VRMViewer)
   const characterScreenPosRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight * 0.2 });
@@ -667,11 +668,11 @@ function App() {
             log.warn("[App] Trigger parsing failed:", err),
           );
 
-        // Preload into AnimationManager
-        const url = URL.createObjectURL(file);
-        motionCallbackRef.current; // just ensure ref exists
-        // The animation will be preloaded on next VRM load cycle
-        URL.revokeObjectURL(url);
+        // Preload into AnimationManager immediately
+        if (preloadCustomAnimRef.current) {
+          await preloadCustomAnimRef.current(entry.filename, file);
+          log.info(`[App] Custom animation preloaded: ${entry.filename}`);
+        }
       } catch (err) {
         log.warn("[App] Failed to add custom animation:", err);
       }
@@ -857,6 +858,7 @@ function App() {
         onEmotionSetterReady={handleVRMEmotionSetter}
         onMotionSetterReady={handleVRMMotionSetter}
         onLoadVRMReady={(fn) => { loadVRMRef.current = fn; }}
+        onPreloadCustomAnimReady={(fn) => { preloadCustomAnimRef.current = fn; }}
         forceInteractive={isChatOpen || isSettingsOpen}
         characterScreenPosRef={characterScreenPosRef}
         onDockHeightChange={setDockHeight}

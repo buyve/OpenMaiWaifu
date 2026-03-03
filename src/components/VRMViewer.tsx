@@ -64,6 +64,8 @@ interface VRMViewerProps {
   onDockHeightChange?: (height: number) => void;
   /** Motion personality type for selecting personality-specific VRMA animations. */
   personality?: MotionPersonality;
+  /** Exposes the preloadCustomAnimation function so parent can preload on-demand. */
+  onPreloadCustomAnimReady?: (fn: (filename: string, file: File) => Promise<void>) => void;
 }
 
 // ---------- Component ----------
@@ -79,6 +81,7 @@ export default function VRMViewer({
   onModelError,
   onDockHeightChange,
   personality,
+  onPreloadCustomAnimReady,
 }: VRMViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -698,7 +701,10 @@ export default function VRMViewer({
     if (onLoadVRMReady) {
       onLoadVRMReady(loadVRM);
     }
-  }, [onEmotionSetterReady, onMotionSetterReady, onLoadVRMReady, emotion.setEmotion, motion.playAnimation, loadVRM]);
+    if (onPreloadCustomAnimReady) {
+      onPreloadCustomAnimReady(motion.preloadCustomAnimation);
+    }
+  }, [onEmotionSetterReady, onMotionSetterReady, onLoadVRMReady, onPreloadCustomAnimReady, emotion.setEmotion, motion.playAnimation, motion.preloadCustomAnimation, loadVRM]);
 
   // ---- Render ----
 

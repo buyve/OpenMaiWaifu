@@ -423,7 +423,9 @@ export class AnimationManager {
     this._loading.add(name);
 
     return new Promise((resolve) => {
-      const url = `${ANIMATIONS_PATH}/${name}.vrma`;
+      const url = name.endsWith(".vrma")
+        ? `${ANIMATIONS_PATH}/${name}`
+        : `${ANIMATIONS_PATH}/${name}.vrma`;
 
       loader.load(
         url,

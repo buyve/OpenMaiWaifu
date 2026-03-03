@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "ai-desktop-companion"
-version = "0.1.0"
+version = "0.2.1"
 dependencies = [
  "cocoa",
  "core-foundation 0.10.1",
