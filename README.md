@@ -46,6 +46,7 @@
   <a href="docs/MEMORY_ARCHITECTURE.md">Memory Docs</a> ·
   <a href="docs/LLM_INTEGRATION.md">LLM Integration</a> ·
   <a href="#quick-start">Getting Started</a> ·
+  <a href="#customization">Customization</a> ·
   <a href="#development">Development</a>
 </p>
 
@@ -77,6 +78,7 @@ irm https://buyve.github.io/OpenMaiWaifu/install.ps1 | iex
 - **Screen-Aware Comments** — Watches your active app and drops context-aware remarks (late-night coding, long YouTube sessions, etc.)
 - **LLM-Powered Imagination** — Combines memories + context to generate autonomous speech
 - **Any VRM Model** — Drag & drop your own `.vrm` character file
+- **Custom Animations** — Add `.vrma` motion files with natural language triggers ("when happy", "randomly sometimes")
 - **10 Languages** — English, Korean, Japanese, Chinese (Simplified/Traditional), Spanish, French, German, Portuguese, Russian
 - **Cross-Platform** — macOS (Apple Silicon + Intel) and Windows
 
@@ -277,6 +279,49 @@ The app stores configuration at:
 | `config.json` | `~/.config/ai-desktop-companion/` | OpenClaw gateway URL, agent ID, CLI path |
 | `firstrun.json` | `~/Library/Application Support/ai-desktop-companion/` | Initial setup (name, personality, language) |
 | localStorage | In-app (WebView) | Memories, beliefs, personality islands, locale |
+
+---
+
+## Customization
+
+### Custom VRM Models
+
+You can use any VRM character model:
+
+1. **Drag & drop** a `.vrm` file directly onto the app window, or
+2. Open **Settings** (gear icon) → **Character** → **Add Model** and select a file
+
+The model switches instantly. All added models are persisted and can be switched from Settings at any time.
+
+**Where to get VRM models:**
+- [VRoid Hub](https://hub.vroid.com/) — Largest VRM model library (free & paid)
+- [VRoid Studio](https://vroid.com/studio) — Create your own VRM character from scratch
+- [Booth.pm](https://booth.pm/) — Search for "VRM" to find community models
+
+### Custom VRMA Animations
+
+Add your own `.vrma` motion files and describe when they should play:
+
+1. Open **Settings** → **Custom Animations**
+2. Click **Add Animation** and select a `.vrma` file
+3. Enter a trigger description in natural language (e.g., "when happy", "randomly sometimes", "in the morning")
+
+The AI parses your description once and classifies it into a trigger type:
+
+| Trigger Type | Example Description | Behavior |
+|-------------|-------------------|----------|
+| **Emotion** | "when sad", "기분 좋을 때" | Plays when the character feels that emotion |
+| **Ambient** | "randomly sometimes", "가끔" | Plays randomly during idle (with configurable chance) |
+| **Scheduled** | "in the morning", "밤에" | Plays during specific hours |
+| **Event** | "when headpatted" | Plays on user interaction |
+| **Idle** | "as idle animation" | Replaces the default idle loop |
+
+Custom animations are saved permanently and reload on restart. If the AI is unavailable when you add an animation, it defaults to ambient (random 20% chance).
+
+**Where to get VRMA animations:**
+- [VRoid Hub](https://hub.vroid.com/) — Filter by "motion" category
+- [Booth.pm](https://booth.pm/) — Search for "VRMA" or "VRM animation"
+- [Mixamo](https://www.mixamo.com/) → Convert FBX to VRMA using [vrm-animation-converter](https://github.com/vrm-c/vrm-animation)
 
 ---
 
