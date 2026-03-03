@@ -39,6 +39,33 @@ prompt() { read -r "$@" </dev/tty; }
 
 banner() {
   echo ""
+  printf "${DIM}"
+  cat << 'EOF'
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣷⣤⣀⠀⠀⠀⠀⠀⠉⠑⣶⣤⣄⣀⣠⣤⣶⣶⣿⣿⣿⣿⡇⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⡿⠟⠋⠁⠀⠀⠀⣀⠤⠒⠉⠈⢉⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀
+  ⠀⠀⠀⠀⣀⣴⣶⣿⣷⡄⠀⠀⠀⠀⢹⣿⣿⣿⣿⠏⠁⠀⢀⠄⠀⠀⠈⢀⠄⠀⢀⡖⠁⠀⢀⠀⠈⠻⣿⣿⣿⣿⡏⠀⠀⠀⠀
+  ⠀⠀⢠⣾⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⢸⣿⣿⠏⠀⠀⢀⡴⠁⠀⠀⣠⠖⠁⢀⠞⠋⠀⢠⡇⢸⡄⠀⠀⠈⢻⣿⣿⠁⠀⠀⠀⠀
+  ⠀⣠⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⢸⡿⠁⠀⠀⢀⡞⠀⠀⢀⡴⠃⠀⣰⠋⠀⠀⣰⡿⠀⡜⢳⡀⠘⣦⠀⢿⡇⠀⠀⠀⠀⠀
+  ⢠⣿⣿⣿⣿⡿⠃⠀⠀⠀⠀⠀⠀⢰⣿⠃⠀⢀⠆⡞⡄⠀⣠⡞⠁⣀⢾⠃⠀⣀⡜⢱⠇⣰⠁⠈⣷⠂⢸⡇⠸⣵⠀⠀⠀⠀⠀
+  ⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⠀⠀⢠⣿⠇⠀⠀⡜⣸⡟⢀⣴⡏⢠⣾⠋⡎⢀⣼⠋⢀⡎⡰⠃⠀⠀⣿⣓⢒⡇⠀⣿⠀⠀⠀⠀⠀
+  ⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠴⢻⣟⢀⣀⢀⣧⡇⢨⠟⢾⣔⡿⠃⢸⢀⠞⠃⢀⣾⡜⠁⠀⠀⠀⡏⠁⢠⠃⠀⢹⠀⠀⠀⠀⠀
+  ⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⢸⣼⢸⣿⡟⢻⣿⠿⣶⣿⣿⣿⣶⣾⣏⣀⣠⣾⣿⠔⠒⠉⠉⢠⠁⡆⡸⠀⡈⣸⠀⠀⠀⠀⠀
+  ⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⠀⠀⣸⣿⣸⣿⣇⢸⠃⡄⢻⠃⣾⣿⢋⠘⣿⣿⠏⣿⡟⣛⡛⢻⣿⢿⣶⣷⣿⣶⢃⣿⠀⠀⠀⠀⠀
+  ⢸⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⣰⠃⣿⣿⣿⣿⠀⣸⣧⠈⣸⣿⠃⠘⠃⢹⣿⠀⣿⠃⠛⠛⣿⡇⢸⣿⡇⢸⣿⡿⣿⡀⠀⠀⠀⠀
+  ⠀⠻⣿⣿⣿⣿⣦⡀⠀⢀⡔⣹⣼⡟⡟⣿⣿⣿⠛⠻⠶⠿⠷⣾⣿⣿⣬⣿⣠⣿⣀⣿⣿⣿⡇⠸⡿⠀⣾⡏⢠⣿⣇⠀⠀⠀⠀
+  ⠀⠀⠙⢿⣿⣿⣿⣿⣷⡞⢠⣿⢿⡇⣿⡹⡝⢿⡷⣄⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠙⠛⠛⠻⠿⣶⣶⣾⣿⣇⣾⠉⢯⠃⠀⠀⠀
+  ⠀⠀⠀⠀⠙⠿⣿⣿⣿⠇⢸⠇⠘⣇⠸⡇⣿⣮⣳⡀⠉⠂⠀⠀⣀⣤⡤⢤⣀⠀⠀⠀⠀⠀⢈⣿⠟⣠⣾⠿⣿⡆⡄⣧⡀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠙⠻⡘⠾⣄⠀⠘⢦⣿⠃⠹⣿⣿⣶⠤⠀⠀⣿⠋⠉⠻⣿⠁⠀⠠⣀⣤⣾⣵⣾⡿⠃⣾⠏⣿⣧⠋⡇⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⣠⠖⠳⣄⡈⠃⠀⠼⠋⠙⢷⣞⢻⣿⣿⣀⡀⠈⠤⣀⠬⠟⠀⢀⣠⣶⠿⢛⡽⠋⣠⣾⣏⣠⡿⣃⣞⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠉⠛⠓⠢⠶⣶⡤⠺⡟⢺⣿⠿⣿⣶⣤⣀⣠⣴⣾⡿⠿⢵⠋⠙⠲⣏⡝⠁⠀⣹⢿⡣⣌⠒⠄⠀
+  ⠀⠀⠀⠀⠀⠀⢸⠈⡄⠀⠇⠀⠀⡖⠁⢢⡞⠀⢰⠻⣆⡏⣇⠙⠻⣿⣿⣿⣿⠋⢀⡴⣪⢷⡀⠀⡘⠀⢀⠜⠁⢀⠟⢆⠑⢄⠀
+  ⠀⠀⠀⠀⠀⠀⠘⡄⠱⠀⠸⡀⠄⠳⡀⠀⢳⡀⢰⠀⢸⢇⡟⠑⠦⢈⡉⠁⢼⢠⡏⣴⠟⢙⠇⠀⡇⢠⠃⢀⡴⠁⠀⠘⠀⠈⡆
+  ⠀⠀⠀⠀⠀⠀⠀⠇⠀⠣⠀⡗⢣⡀⠘⢄⠀⢧⠀⢳⡟⠛⠙⣧⣧⣠⣄⣀⣠⢿⣶⠁⠀⠸⡀⠀⠓⠚⢴⣋⣠⠔⠀⠀⠀⠀⠁
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠧⡤⠙⢤⡈⣦⡼⠀⠀⠧⢶⠚⡇⠈⠁⠈⠃⠀⡰⢿⣄⠀⠀⠑⢤⣀⠀⠀⠀⠈⠁⠀⠀⠀⠀⠀
+EOF
+  printf "${RESET}"
+  echo ""
   printf "${BOLD}${CYAN}"
   cat << 'EOF'
     ╔═══════════════════════════════════════╗
@@ -183,16 +210,16 @@ setup_wizard() {
 
   # 3b. Ask for companion name
   echo ""
-  ask "Name your companion [Companion]:"
+  ask "Name your waifu [Waifu]:"
   local companion_name
   prompt companion_name
   companion_name=$(echo "$companion_name" | xargs)
-  companion_name=${companion_name:-Companion}
-  ok "Companion name: ${companion_name}"
+  companion_name=${companion_name:-Waifu}
+  ok "Waifu name: ${companion_name}"
 
   # 3c. Choose personality
   echo ""
-  info "Choose a personality for your companion:"
+  info "Choose a personality for your waifu:"
   echo ""
   echo "  1) Innocent — Pure, cheerful, and adorably naive"
   echo "  2) Cool / Tsundere — Tough on the outside, caring underneath"
@@ -459,7 +486,7 @@ for a in agents:
 
       # Set agent identity (name + emoji)
       if [ -n "$agent_id" ]; then
-        info "Setting companion identity: ${companion_name}..."
+        info "Setting waifu identity: ${companion_name}..."
         "$openclaw_cmd" agents set-identity --agent "$agent_id" --name "$companion_name" --emoji "✨" 2>/dev/null \
           && ok "Identity set: ${companion_name} ✨" \
           || warn "Could not set identity (non-critical)"
@@ -495,7 +522,7 @@ for a in agents:
   mkdir -p "$CONFIG_DIR"
 
   # Build SOUL text for the companion
-  local soul_text="You are ${companion_name}, a desktop companion character living on the user's screen. Personality: ${personality_desc} The user's name is ${user_name}. Address them as ${user_name}. Speaking style: ${speaking_style}. Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
+  local soul_text="You are ${companion_name}, a desktop waifu character living on the user's screen. Personality: ${personality_desc} The user's name is ${user_name}. Address them as ${user_name}. Speaking style: ${speaking_style}. Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
 
   # Write firstrun.json for the app to consume (use python3 for safe JSON encoding)
   python3 -c "
@@ -542,7 +569,7 @@ for a in agents:
 
 ## Core Identity
 
-You are **${companion_name}**, a desktop companion living on ${user_name}'s screen.
+You are **${companion_name}**, a desktop waifu living on ${user_name}'s screen.
 
 ## Personality
 
@@ -621,7 +648,7 @@ EOF
   fi
 
   echo ""
-  ok "Done! Enjoy your AI companion 🎉"
+  ok "Done! Enjoy your AI waifu 🎉"
   echo ""
 }
 

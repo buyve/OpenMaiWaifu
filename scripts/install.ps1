@@ -44,6 +44,29 @@ function Ask($msg)   { Write-Host "  ? " -ForegroundColor Cyan -NoNewline; Write
 
 function Banner {
     Write-Host ""
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣷⣤⣀⠀⠀⠀⠀⠀⠉⠑⣶⣤⣄⣀⣠⣤⣶⣶⣿⣿⣿⣿⡇⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⡿⠟⠋⠁⠀⠀⠀⣀⠤⠒⠉⠈⢉⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⣀⣴⣶⣿⣷⡄⠀⠀⠀⠀⢹⣿⣿⣿⣿⠏⠁⠀⢀⠄⠀⠀⠈⢀⠄⠀⢀⡖⠁⠀⢀⠀⠈⠻⣿⣿⣿⣿⡏⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⢠⣾⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⢸⣿⣿⠏⠀⠀⢀⡴⠁⠀⠀⣠⠖⠁⢀⠞⠋⠀⢠⡇⢸⡄⠀⠀⠈⢻⣿⣿⠁⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⣠⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⢸⡿⠁⠀⠀⢀⡞⠀⠀⢀⡴⠃⠀⣰⠋⠀⠀⣰⡿⠀⡜⢳⡀⠘⣦⠀⢿⡇⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⢠⣿⣿⣿⣿⡿⠃⠀⠀⠀⠀⠀⠀⢰⣿⠃⠀⢀⠆⡞⡄⠀⣠⡞⠁⣀⢾⠃⠀⣀⡜⢱⠇⣰⠁⠈⣷⠂⢸⡇⠸⣵⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⠀⠀⢠⣿⠇⠀⠀⡜⣸⡟⢀⣴⡏⢠⣾⠋⡎⢀⣼⠋⢀⡎⡰⠃⠀⠀⣿⣓⢒⡇⠀⣿⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠴⢻⣟⢀⣀⢀⣧⡇⢨⠟⢾⣔⡿⠃⢸⢀⠞⠃⢀⣾⡜⠁⠀⠀⠀⡏⠁⢠⠃⠀⢹⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⢸⣼⢸⣿⡟⢻⣿⠿⣶⣿⣿⣿⣶⣾⣏⣀⣠⣾⣿⠔⠒⠉⠉⢠⠁⡆⡸⠀⡈⣸⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⠀⠀⣸⣿⣸⣿⣇⢸⠃⡄⢻⠃⣾⣿⢋⠘⣿⣿⠏⣿⡟⣛⡛⢻⣿⢿⣶⣷⣿⣶⢃⣿⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⢸⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⣰⠃⣿⣿⣿⣿⠀⣸⣧⠈⣸⣿⠃⠘⠃⢹⣿⠀⣿⠃⠛⠛⣿⡇⢸⣿⡇⢸⣿⡿⣿⡀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠻⣿⣿⣿⣿⣦⡀⠀⢀⡔⣹⣼⡟⡟⣿⣿⣿⠛⠻⠶⠿⠷⣾⣿⣿⣬⣿⣠⣿⣀⣿⣿⣿⡇⠸⡿⠀⣾⡏⢠⣿⣇⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠙⢿⣿⣿⣿⣿⣷⡞⢠⣿⢿⡇⣿⡹⡝⢿⡷⣄⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠙⠛⠛⠻⠿⣶⣶⣾⣿⣇⣾⠉⢯⠃⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠙⠿⣿⣿⣿⠇⢸⠇⠘⣇⠸⡇⣿⣮⣳⡀⠉⠂⠀⠀⣀⣤⡤⢤⣀⠀⠀⠀⠀⠀⢈⣿⠟⣠⣾⠿⣿⡆⡄⣧⡀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠙⠻⡘⠾⣄⠀⠘⢦⣿⠃⠹⣿⣿⣶⠤⠀⠀⣿⠋⠉⠻⣿⠁⠀⠠⣀⣤⣾⣵⣾⡿⠃⣾⠏⣿⣧⠋⡇⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⣠⠖⠳⣄⡈⠃⠀⠼⠋⠙⢷⣞⢻⣿⣿⣀⡀⠈⠤⣀⠬⠟⠀⢀⣠⣶⠿⢛⡽⠋⣠⣾⣏⣠⡿⣃⣞⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠉⠛⠓⠢⠶⣶⡤⠺⡟⢺⣿⠿⣿⣶⣤⣀⣠⣴⣾⡿⠿⢵⠋⠙⠲⣏⡝⠁⠀⣹⢿⡣⣌⠒⠄⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⢸⠈⡄⠀⠇⠀⠀⡖⠁⢢⡞⠀⢰⠻⣆⡏⣇⠙⠻⣿⣿⣿⣿⠋⢀⡴⣪⢷⡀⠀⡘⠀⢀⠜⠁⢀⠟⢆⠑⢄⠀" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠘⡄⠱⠀⠸⡀⠄⠳⡀⠀⢳⡀⢰⠀⢸⢇⡟⠑⠦⢈⡉⠁⢼⢠⡏⣴⠟⢙⠇⠀⡇⢠⠃⢀⡴⠁⠀⠘⠀⠈⡆" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠇⠀⠣⠀⡗⢣⡀⠘⢄⠀⢧⠀⢳⡟⠛⠙⣧⣧⣠⣄⣀⣠⢿⣶⠁⠀⠸⡀⠀⠓⠚⢴⣋⣠⠔⠀⠀⠀⠀⠁" -ForegroundColor DarkGray
+    Write-Host "  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠧⡤⠙⢤⡈⣦⡼⠀⠀⠧⢶⠚⡇⠈⠁⠈⠃⠀⡰⢿⣄⠀⠀⠑⢤⣀⠀⠀⠀⠈⠁⠀⠀⠀⠀⠀" -ForegroundColor DarkGray
+    Write-Host ""
     Write-Host "    +=======================================+" -ForegroundColor Cyan
     Write-Host "    |   OpenMaiWaifu  - Installer   |" -ForegroundColor Cyan
     Write-Host "    +=======================================+" -ForegroundColor Cyan
@@ -145,14 +168,14 @@ function Setup-Wizard {
 
     # 2c. Ask for companion name
     Write-Host ""
-    Ask "Name your companion [Companion]: "
+    Ask "Name your waifu [Waifu]: "
     $companionName = (Read-Host).Trim()
-    if (-not $companionName) { $companionName = "Companion" }
-    Ok "Companion name: $companionName"
+    if (-not $companionName) { $companionName = "Waifu" }
+    Ok "Waifu name: $companionName"
 
     # 2d. Choose personality
     Write-Host ""
-    Info "Choose a personality for your companion:"
+    Info "Choose a personality for your waifu:"
     Write-Host ""
     Write-Host "  1) Innocent - Pure, cheerful, and adorably naive"
     Write-Host "  2) Cool / Tsundere - Tough on the outside, caring underneath"
@@ -394,7 +417,7 @@ function Setup-Wizard {
 
             # Set agent identity
             if ($agentId) {
-                Info "Setting companion identity: $companionName..."
+                Info "Setting waifu identity: $companionName..."
                 try {
                     & $openclawCmd agents set-identity --agent $agentId --name $companionName --emoji "✨" 2>$null
                     Ok "Identity set: $companionName"
@@ -435,7 +458,7 @@ function Setup-Wizard {
     if (-not (Test-Path $DATA_DIR)) { New-Item -ItemType Directory -Path $DATA_DIR -Force | Out-Null }
     if (-not (Test-Path $CONFIG_DIR)) { New-Item -ItemType Directory -Path $CONFIG_DIR -Force | Out-Null }
 
-    $soulText = "You are $companionName, a desktop companion character living on the user's screen. Personality: $personalityDesc The user's name is $userName. Address them as $userName. Speaking style: $speakingStyle. Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
+    $soulText = "You are $companionName, a desktop waifu character living on the user's screen. Personality: $personalityDesc The user's name is $userName. Address them as $userName. Speaking style: $speakingStyle. Keep responses concise (1-3 sentences). Express emotions with [emotion:X] tags (happy/sad/angry/surprised/neutral/relaxed/thinking). Express motions with [motion:X] tags (wave/nod/shake/idle). Always stay in character. Never say you are an AI. Never break the fourth wall."
 
     $firstrun = @{
         userName = $userName
@@ -474,7 +497,7 @@ function Setup-Wizard {
 
 ## Core Identity
 
-You are **$companionName**, a desktop companion living on $userName's screen.
+You are **$companionName**, a desktop waifu living on $userName's screen.
 
 ## Personality
 
@@ -566,7 +589,7 @@ $personalityDesc
     }
 
     Write-Host ""
-    Ok "Done! Enjoy your AI companion"
+    Ok "Done! Enjoy your AI waifu"
     Write-Host ""
 }
 
