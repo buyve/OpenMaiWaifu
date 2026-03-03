@@ -135,6 +135,29 @@ export function useMotion(vrm: VRM | null, personality: MotionPersonality = "inn
       setTimeout(() => {
         manager.playBase("idle", 0.5);
       }, (dur - 0.5) * 1000); // Start crossfade 0.5s before end
+
+      // Preload custom animations from user's library
+      import("../lib/customAnimationManager.ts")
+        .then(({ listCustomAnimations, loadCustomAnimationFile }) =>
+          listCustomAnimations().then(async (anims) => {
+            for (const anim of anims) {
+              try {
+                const file = await loadCustomAnimationFile(anim.filename);
+                const url = URL.createObjectURL(file);
+                await manager.loadCustomAnimation(anim.filename, url);
+                URL.revokeObjectURL(url);
+              } catch (err) {
+                log.warn(`[useMotion] Failed to preload custom animation: ${anim.filename}`, err);
+              }
+            }
+            if (anims.length > 0) {
+              log.info(`[useMotion] Preloaded ${anims.length} custom animations`);
+            }
+          }),
+        )
+        .catch((err) =>
+          log.warn("[useMotion] Failed to load custom animation list:", err),
+        );
     });
 
     return () => {

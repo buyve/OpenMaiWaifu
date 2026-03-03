@@ -263,6 +263,74 @@ export class AnimationManager {
     await Promise.all(names.map((name) => this._loadAnimation(name)));
   }
 
+  /**
+   * Load a custom animation from a blob URL and cache it.
+   * Used for user-added VRMA files loaded from disk via Tauri.
+   */
+  loadCustomAnimation(name: string, blobUrl: string): Promise<CachedClip | null> {
+    const cached = this._cache.get(name);
+    if (cached) return Promise.resolve(cached);
+
+    if (this._loading.has(name)) {
+      return new Promise((resolve) => {
+        const startTime = Date.now();
+        const check = setInterval(() => {
+          if (Date.now() - startTime > 10000) {
+            clearInterval(check);
+            this._loading.delete(name);
+            resolve(null);
+            return;
+          }
+          const entry = this._cache.get(name);
+          if (entry || !this._loading.has(name)) {
+            clearInterval(check);
+            resolve(entry ?? null);
+          }
+        }, 50);
+      });
+    }
+
+    const loader = this._loader;
+    const vrm = this._vrm;
+    if (!loader || !vrm) return Promise.resolve(null);
+
+    this._loading.add(name);
+
+    return new Promise((resolve) => {
+      loader.load(
+        blobUrl,
+        (gltf) => {
+          const vrmAnimation = gltf.userData.vrmAnimations?.[0] as
+            | VRMAnimation
+            | undefined;
+
+          if (!vrmAnimation || !this._vrm) {
+            log.warn(`[AnimationManager] No VRM animation data in custom: ${name}`);
+            this._loading.delete(name);
+            resolve(null);
+            return;
+          }
+
+          const clip = createVRMAnimationClip(vrmAnimation, this._vrm);
+          const layer = AnimationLayer.Action;
+          const entry: CachedClip = { clip, layer };
+
+          this._cache.set(name, entry);
+          this._loading.delete(name);
+
+          log.info(`[AnimationManager] Loaded custom: ${name} (${clip.duration.toFixed(2)}s)`);
+          resolve(entry);
+        },
+        undefined,
+        (err) => {
+          log.warn(`[AnimationManager] Failed to load custom ${name}:`, err);
+          this._loading.delete(name);
+          resolve(null);
+        },
+      );
+    });
+  }
+
   /** Frame update. Advances the animation mixer. Must be called every frame. */
   update(delta: number): void {
     this._mixer?.update(delta);

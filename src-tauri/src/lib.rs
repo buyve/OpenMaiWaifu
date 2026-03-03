@@ -10,10 +10,12 @@
 //! - Primary-screen size detection ([`window`])
 //! - Mouse coordinate broadcasting ([`hittest`])
 
+mod animations;
 mod audio;
 mod config;
 mod hittest;
 mod memory;
+mod models;
 mod openclaw;
 mod screen;
 mod stats;
@@ -216,6 +218,12 @@ pub fn run() {
             memory::read_data_file,
             memory::write_data_file,
             memory::delete_data_file,
+            models::save_vrm_model,
+            models::delete_vrm_model,
+            models::read_vrm_model,
+            animations::save_custom_animation,
+            animations::delete_custom_animation,
+            animations::read_custom_animation,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

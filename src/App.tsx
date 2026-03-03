@@ -515,6 +515,16 @@ function App() {
 
   const handleEmotionChange = useCallback((emotion: string) => {
     emotionCallbackRef.current?.(emotion);
+    // Check if any custom animation matches this emotion
+    import("./lib/customAnimationManager.ts")
+      .then(({ getAnimationsForEmotion }) => getAnimationsForEmotion(emotion))
+      .then((anims) => {
+        if (anims.length > 0) {
+          const pick = anims[Math.floor(Math.random() * anims.length)];
+          motionCallbackRef.current?.(pick.filename);
+        }
+      })
+      .catch(() => { /* best-effort */ });
   }, []);
 
   const handleMotionTrigger = useCallback((motion: string) => {
@@ -590,12 +600,96 @@ function App() {
     setCurrentModelName(file.name);
     localStorage.setItem(SETTINGS_MODEL_NAME_KEY, file.name);
     loadVRMRef.current?.(file);
+    // Persist to models directory
+    import("./lib/modelManager.ts").then(({ addModel }) =>
+      addModel(file).catch((err) =>
+        log.warn("[App] Failed to persist VRM model:", err),
+      ),
+    );
   }, []);
 
-  const handleModelReset = useCallback(() => {
-    setCurrentModelName("default.vrm");
-    localStorage.setItem(SETTINGS_MODEL_NAME_KEY, "default.vrm");
+  const handleModelSwitch = useCallback(async (filename: string) => {
+    try {
+      if (filename === "default.vrm") {
+        setCurrentModelName("default.vrm");
+        localStorage.setItem(SETTINGS_MODEL_NAME_KEY, "default.vrm");
+        loadVRMRef.current?.("/models/default.vrm");
+        const { setActiveModel } = await import("./lib/modelManager.ts");
+        await setActiveModel("default.vrm");
+      } else {
+        const { loadModelFile, setActiveModel } = await import("./lib/modelManager.ts");
+        const file = await loadModelFile(filename);
+        setCurrentModelName(filename);
+        localStorage.setItem(SETTINGS_MODEL_NAME_KEY, filename);
+        loadVRMRef.current?.(file);
+        await setActiveModel(filename);
+      }
+    } catch (err) {
+      log.warn("[App] Failed to switch model:", err);
+    }
   }, []);
+
+  const handleModelDelete = useCallback(async (filename: string) => {
+    try {
+      const { deleteModel } = await import("./lib/modelManager.ts");
+      const newActive = await deleteModel(filename);
+      // If deleted model was active, switch to the new active
+      setCurrentModelName((prev) => {
+        if (prev === filename) {
+          if (newActive === "default.vrm") {
+            loadVRMRef.current?.("/models/default.vrm");
+          }
+          localStorage.setItem(SETTINGS_MODEL_NAME_KEY, newActive);
+          return newActive;
+        }
+        return prev;
+      });
+    } catch (err) {
+      log.warn("[App] Failed to delete model:", err);
+    }
+  }, []);
+
+  const handleCustomAnimationAdd = useCallback(
+    async (file: File, triggerText: string) => {
+      try {
+        const { addCustomAnimation, updateTriggerParsed } = await import(
+          "./lib/customAnimationManager.ts"
+        );
+        const entry = await addCustomAnimation(file, triggerText);
+
+        // Parse trigger text via LLM (async, non-blocking)
+        import("./lib/triggerParser.ts")
+          .then(({ parseTriggerText }) => parseTriggerText(triggerText))
+          .then((parsed) => updateTriggerParsed(entry.filename, parsed))
+          .catch((err) =>
+            log.warn("[App] Trigger parsing failed:", err),
+          );
+
+        // Preload into AnimationManager
+        const url = URL.createObjectURL(file);
+        motionCallbackRef.current; // just ensure ref exists
+        // The animation will be preloaded on next VRM load cycle
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        log.warn("[App] Failed to add custom animation:", err);
+      }
+    },
+    [],
+  );
+
+  const handleCustomAnimationDelete = useCallback(
+    async (filename: string) => {
+      try {
+        const { deleteCustomAnimation } = await import(
+          "./lib/customAnimationManager.ts"
+        );
+        await deleteCustomAnimation(filename);
+      } catch (err) {
+        log.warn("[App] Failed to delete custom animation:", err);
+      }
+    },
+    [],
+  );
 
   const handleCommentFrequencyChange = useCallback(
     (freq: CommentFrequency) => {
@@ -616,6 +710,45 @@ function App() {
     [privacyManager],
   );
 
+
+  // ---------- Custom Animation: Ambient & Scheduled Tick ----------
+
+  useEffect(() => {
+    const AMBIENT_TICK_MS = 45_000; // Check every 45 seconds
+
+    const tick = async () => {
+      try {
+        const { getAmbientAnimations, getScheduledAnimations } = await import(
+          "./lib/customAnimationManager.ts"
+        );
+
+        // Ambient: roll dice for each ambient animation
+        const ambients = await getAmbientAnimations();
+        for (const anim of ambients) {
+          if (
+            anim.triggerParsed?.type === "ambient" &&
+            Math.random() < anim.triggerParsed.chance
+          ) {
+            motionCallbackRef.current?.(anim.filename);
+            return; // Play at most one per tick
+          }
+        }
+
+        // Scheduled: check current hour
+        const hour = new Date().getHours();
+        const scheduled = await getScheduledAnimations(hour);
+        if (scheduled.length > 0) {
+          const pick = scheduled[Math.floor(Math.random() * scheduled.length)];
+          motionCallbackRef.current?.(pick.filename);
+        }
+      } catch {
+        // best-effort
+      }
+    };
+
+    const interval = setInterval(tick, AMBIENT_TICK_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   // ---------- Phase 8: Escape Key Handler ----------
 
@@ -781,7 +914,10 @@ function App() {
           onClose={handleSettingsClose}
           currentModelName={currentModelName}
           onModelChange={handleModelChange}
-          onModelReset={handleModelReset}
+          onModelSwitch={handleModelSwitch}
+          onModelDelete={handleModelDelete}
+          onCustomAnimationAdd={handleCustomAnimationAdd}
+          onCustomAnimationDelete={handleCustomAnimationDelete}
           commentFrequency={behaviorSettings.commentFrequency}
           onCommentFrequencyChange={handleCommentFrequencyChange}
           privacySettings={privacySettingsState}

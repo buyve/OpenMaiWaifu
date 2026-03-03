@@ -619,13 +619,22 @@ export default function VRMViewer({
   // ---- Load VRM model on mount (from saved path or default) ----
 
   useEffect(() => {
-    const savedModel = localStorage.getItem("companion_vrm_model_path");
-    // Ignore legacy asset:// URLs from before scope restriction
-    if (savedModel && !savedModel.startsWith("asset://")) {
-      loadVRM(savedModel);
-    } else {
-      loadVRM("/models/default.vrm");
-    }
+    const loadStartupModel = async () => {
+      try {
+        const { getActiveModel, loadModelFile, DEFAULT_MODEL } = await import("../lib/modelManager.ts");
+        const active = await getActiveModel();
+        if (active === DEFAULT_MODEL) {
+          loadVRM("/models/default.vrm");
+        } else {
+          const file = await loadModelFile(active);
+          loadVRM(file);
+        }
+      } catch (err) {
+        log.warn("[VRMViewer] Failed to load saved model, falling back to default:", err);
+        loadVRM("/models/default.vrm");
+      }
+    };
+    loadStartupModel();
   }, [loadVRM]);
 
   // ---- VRM drag-and-drop (Tauri file drop) ----
@@ -643,14 +652,19 @@ export default function VRMViewer({
         if (vrmPath) {
           const filename = vrmPath.split("/").pop() || vrmPath;
           invoke<number[]>("read_file_bytes", { path: vrmPath })
-            .then((bytes) => {
+            .then(async (bytes) => {
               const blob = new Blob([new Uint8Array(bytes)], { type: "application/octet-stream" });
               const file = new File([blob], filename, { type: "application/octet-stream" });
               loadVRM(file);
-              // Clear any saved asset:// path so next launch uses default
-              localStorage.removeItem("companion_vrm_model_path");
               onModelLoaded?.(filename);
               log.info(`[VRMViewer] VRM dropped: ${filename}`);
+              // Persist dropped VRM to models directory
+              try {
+                const { addModel } = await import("../lib/modelManager.ts");
+                await addModel(file);
+              } catch (err) {
+                log.warn("[VRMViewer] Failed to persist dropped VRM:", err);
+              }
             })
             .catch((err) => {
               log.error(`[VRMViewer] Failed to read dropped VRM: ${err}`);
