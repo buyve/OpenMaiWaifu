@@ -310,9 +310,9 @@ The AI parses your description once and classifies it into a trigger type:
 
 | Trigger Type | Example Description | Behavior |
 |-------------|-------------------|----------|
-| **Emotion** | "when sad", "기분 좋을 때" | Plays when the character feels that emotion |
-| **Ambient** | "randomly sometimes", "가끔" | Plays randomly during idle (with configurable chance) |
-| **Scheduled** | "in the morning", "밤에" | Plays during specific hours |
+| **Emotion** | "when sad" | Plays when the character feels that emotion |
+| **Ambient** | "randomly sometimes" | Plays randomly during idle (with configurable chance) |
+| **Scheduled** | "in the morning" | Plays during specific hours |
 | **Event** | "when headpatted" | Plays on user interaction |
 | **Idle** | "as idle animation" | Replaces the default idle loop |
 
